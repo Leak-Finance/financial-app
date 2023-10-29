@@ -1,23 +1,39 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import LoginFormPage from "/src/authentication/pages/login-form.page.vue";
+import PageNotFound from "/src/shared/pages/page-not-found.page.vue";
+import LoginEmployeeForm from "/src/authentication/pages/login-employee-form.vue";
+
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
+    { path: '/login', name: 'Log In', component: LoginFormPage, meta: { requiresAuth: false }},
+    { path: '/login/employee', name: 'Employee Log In', component: LoginEmployeeForm, meta: { requiresAuth: false }},
+    { path: '/:notFound(.*)', component: PageNotFound, meta: { requiresAuth: false }},
     {
       path: '/',
-      name: 'home',
-      component: HomeView
+      redirect: (to) => {
+        if (to.meta.requiresAuth) {
+          return '/catalog';
+        } else {
+          return '/login';
+        }
+      },
     },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    }
   ]
 })
+
+/*
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+  if (to.meta.requiresAuth && !userStore.isAuthenticated) {
+    next('/login');
+  } else if (!to.meta.requiresAuth && userStore.isAuthenticated) {
+    next('/products');
+  } else {
+    next();
+  }
+});
+*/
 
 export default router

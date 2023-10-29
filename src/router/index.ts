@@ -1,12 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LoginFormPage from "/src/authentication/pages/login-form.page.vue";
-import PageNotFound from "/src/shared/pages/page-not-found.page.vue";
-import LoginEmployeeForm from "/src/authentication/pages/login-employee-form.vue";
+import LoginFormPage from "../authentication/pages/login-form.page.vue";
+import PageNotFound from "../shared/pages/page-not-found.page.vue";
+import LoginEmployeeForm from "../authentication/pages/login-employee-form.page.vue";
+import RegisterFormPage from "../authentication/pages/register-form.page.vue";
 
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    { path: '/register', name: 'Register', component: RegisterFormPage, meta: { requiresAuth: false }},
     { path: '/login', name: 'Log In', component: LoginFormPage, meta: { requiresAuth: false }},
     { path: '/login/employee', name: 'Employee Log In', component: LoginEmployeeForm, meta: { requiresAuth: false }},
     { path: '/:notFound(.*)', component: PageNotFound, meta: { requiresAuth: false }},

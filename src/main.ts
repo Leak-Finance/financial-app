@@ -9,6 +9,8 @@ import router from './router'
 import PrimeVue from "primevue/config";
 import Tailwind from "primevue/passthrough/tailwind";
 
+import 'primevue/resources/themes/viva-light/theme.css'
+
 
 import InlineMessage from 'primevue/inlinemessage';
 import InputText from 'primevue/inputtext';
@@ -21,10 +23,11 @@ import ProgressSpinner from 'primevue/progressspinner';
 import Tag from 'primevue/tag';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import Dialog from 'primevue/dialog';
 
 createApp(App)
     .use(createPinia())
-    .use(PrimeVue, { unstyled: true, Tailwind })
+    .use(PrimeVue, { ripple: true, Tailwind })
     .use(router)
     .component('InlineMessage', InlineMessage)
     .component('InputText', InputText)
@@ -37,4 +40,5 @@ createApp(App)
     .component('Tag', Tag)
     .component('DataTable', DataTable)
     .component('Column', Column)
+    .component('Dialog', Dialog)
     .mount('#app')

@@ -86,7 +86,7 @@ export default {
         </p>
       </div>
     </form>
-    <div class="flex sm:block md:w-1/2 w-full">
+    <div class="hidden sm:block md:w-1/2 w-full">
       <img class="w-auto rounded" src="../../assets/login-employee-image.png" alt="Employee login image">
     </div>
   </div>

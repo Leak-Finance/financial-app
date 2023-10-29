@@ -11,7 +11,7 @@
 
 @layer components {
     .btn-fill {
-        @apply bg-primary py-2 px-8 rounded-xl;
+        @apply py-4 bg-secondary;
         @apply hover:cursor-pointer duration-200;
         @apply font-semibold text-white text-lg;
     }

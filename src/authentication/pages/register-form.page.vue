@@ -66,7 +66,7 @@ export default {
     </div>
   </Dialog>
 
-  <div class="grid md:flex items-center text-center md:text-justify h-screen overflow-hidden">
+  <div class="grid md:flex items-center md:text-justify h-screen overflow-hidden">
     <form @submit.prevent="register" class="grid gap-8 justify-center p-8 md:w-1/2">
       <h1 class="text-6xl font-bold text-primary">
         Registro
@@ -136,7 +136,7 @@ export default {
         </p>
       </div>
     </form>
-    <div class="flex sm:block md:w-1/2 w-full">
+    <div class="hidden sm:block md:w-1/2 w-full">
       <img class="w-auto rounded" src="../../assets/register-image.png" alt="Hero image">
     </div>
   </div>

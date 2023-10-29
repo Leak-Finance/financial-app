@@ -30,11 +30,11 @@ export default {
 </script>
 
 <template>
-  <div class="grid md:flex items-center text-center md:text-justify h-screen overflow-hidden">
-    <div class="flex sm:block md:w-1/2 w-full">
-      <img class="w-auto rounded" src="../../assets/login-image.png" alt="Hero image">
+  <div class="grid md:flex flex-wrap items-center text-center md:text-justify h-screen overflow-hidden">
+    <div class="hidden sm:block md:w-1/2 w-full">
+      <img class="w-auto rounded" src="../../assets/login-image.png" alt="Login clients image">
     </div>
-    <form @submit.prevent="login" class="grid gap-8 justify-center p-8 md:w-1/2">
+    <form @submit.prevent="login" class="grid gap-8 justify-center p-8 w-full md:w-1/2">
       <h1 class="text-6xl font-bold text-primary">
         Bienvenido
       </h1>
@@ -78,7 +78,7 @@ export default {
         </p>
       </div>
       <div class="grid gap-4 items-center text-center">
-        <button class="btn-fill py-4 bg-secondary" type="submit">
+        <button class="btn-filled py-4 bg-secondary" type="submit">
           Iniciar sesión
         </button>
         <p>

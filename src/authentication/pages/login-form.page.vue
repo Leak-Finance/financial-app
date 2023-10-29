@@ -35,7 +35,7 @@ export default {
       <img class="w-auto rounded" src="../../assets/login-image.png" alt="Hero image">
     </div>
     <form @submit.prevent="login" class="grid gap-8 justify-center p-8 md:w-1/2">
-      <h1 class="text-6xl font-bold">
+      <h1 class="text-6xl font-bold text-primary">
         Bienvenido
       </h1>
       <p>

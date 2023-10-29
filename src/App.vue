@@ -59,6 +59,7 @@ export default {
         <img src="./assets/finance-logo.png" alt="Finance logo"
              class="h-6 md:h-8 hover:scale-95 duration-200" />
       </router-link>
+
       <div class="flex gap-6 items-center">
         <!-- Client navbar -->
         <div v-if="user">
@@ -67,17 +68,23 @@ export default {
             <p>Cuenta</p> <!-- TODO: dropdown -->
           </div>
         </div>
+
         <!-- TODO: Employee navbar -->
         <div v-if="user==null">
           <div class="flex gap-8">
             <router-link to="/login">
-              <p class="font-medium text-lg">Iniciar sesión</p>
+              <p class="font-medium text-lg hover:text-secondary duration-200">
+                Iniciar sesión
+              </p>
             </router-link>
             <router-link to="/register">
-              <p class="font-medium text-lg">Registro</p>
+              <p class="font-medium text-lg hover:text-secondary duration-200">
+                Registro
+              </p>
             </router-link>
           </div>
         </div>
+
       </div>
     </div>
   </nav>

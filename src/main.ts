@@ -9,9 +9,9 @@ import router from './router'
 import PrimeVue from "primevue/config";
 import Tailwind from "primevue/passthrough/tailwind";
 
-import 'primevue/resources/themes/viva-light/theme.css'
+import 'primevue/resources/themes/soho-light/theme.css'
 
-
+import 'primeicons/primeicons.css'
 import InlineMessage from 'primevue/inlinemessage';
 import InputText from 'primevue/inputtext';
 import Button from "primevue/button";

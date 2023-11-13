@@ -15,7 +15,7 @@ export default {
             <h1 class="text-2xl text-3xl font-black">Error 404</h1>
             <p class="text-xl">No pudimos encontrar la página</p>
           </div>
-          <router-link to="/"><button class="btn-fill">Volver</button></router-link>
+          <router-link to="/"><button class="btn-fill px-8 rounded">Volver</button></router-link>
         </div>
       </div>
     </div>

@@ -24,6 +24,8 @@ import Tag from 'primevue/tag';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
+import Calendar from 'primevue/calendar';
+
 
 createApp(App)
     .use(createPinia())
@@ -41,4 +43,5 @@ createApp(App)
     .component('DataTable', DataTable)
     .component('Column', Column)
     .component('Dialog', Dialog)
+    .component('Calendar', Calendar)
     .mount('#app')

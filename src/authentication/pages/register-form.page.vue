@@ -45,7 +45,7 @@ export default {
     resetErrorMessage() {
       this.errorMessage = '';
     },
-    changeAvatar(selectedAvatarUrl){
+    changeAvatar(selectedAvatarUrl: string){
       this.avatarUrl = selectedAvatarUrl;
       this.visible = false;
     }
@@ -141,3 +141,4 @@ export default {
     </div>
   </div>
 </template>
+

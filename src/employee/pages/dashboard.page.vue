@@ -68,7 +68,14 @@ export default {
           organizational_users_id: 1,
           profile_url: 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png'
         },
-      ]
+      ],
+
+      selectedBrand: null,
+      selectedYear: null,
+      modelName: null,
+      selectedCurrency:null,
+      selectedPrice: null,
+      description: null,
     };
   },
   created() {
@@ -79,14 +86,14 @@ export default {
       const endIndex = startIndex + this.itemsPerPage;
       return this.posts.slice(startIndex, endIndex);
     },
-    getVehicle(vehicleId){
+    getVehicle(vehicleId: Number){
       return this.vehicles.find(vehicle => vehicle.id === vehicleId);
     },
-    getVehicleBrand(vehicleId){
+    getVehicleBrand(vehicleId: Number){
       const vehicleBrandId = this.vehicles.find(vehicle => vehicle.id === vehicleId).vehicle_brand_id;
       return this.vehicle_brands.find(vehicle_brand => vehicle_brand.id === vehicleBrandId);
     },
-    getEmployeeProfile(employeeProfileId){
+    getEmployeeProfile(employeeProfileId: Number){
       return this.employee_profiles.find(employee_profile => employee_profile.id === employeeProfileId);
     }
   },
@@ -122,9 +129,27 @@ export default {
       <LoadingSpinner />
     </div>
   </div>
-  <Dialog v-model:visible="newCarPostDialog" modal
-          class="w-96"
-          header="Agregar carro">
-    TODO: Agregar formulario para agregar carro
+  <Dialog v-model:visible="newCarPostDialog" header="Agregar carro" modal class="w-full md:w-1/3">
+    <div class="grid gap-2">
+      <p class="text-lg text-gray-400 font-medium">Todos los campos son obligatorios</p>
+      <div class="flex gap-2">
+        <Dropdown v-model="selectedBrand" :options="vehicle_brands" optionLabel="name" placeholder="Marca" class="w-full" />
+        <Calendar v-model="selectedYear" view="year" dateFormat="yy" class="w-full" />
+      </div>
+      <div class="grid">
+        <label for="modelName" class="text-sm">Modelo</label>
+        <InputText id="modelName" v-model="modelName" aria-describedby="username-help" />
+      </div>
+      <div class="flex gap-2">
+        <div class="grid">
+          <label for="modelName" class="text-sm">Modelo</label>
+          <InputText id="modelName" v-model="modelName" aria-describedby="username-help" />
+        </div>
+        <div class="grid">
+          <label for="price" class="text-sm">Precio</label>
+          <InputText id="price" v-model="selectedPrice" aria-describedby="username-help" />
+        </div>
+      </div>
+    </div>
   </Dialog>
 </template>

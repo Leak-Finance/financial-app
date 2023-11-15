@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 import LoadingSpinner from '../../shared/components/loading-spinner.component.vue';
 import PostManagementCard from "@/employee/components/post-management-card.component.vue";
 export default {
@@ -69,7 +69,20 @@ export default {
           profile_url: 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png'
         },
       ],
+      currencies : [
+        {
+          id: 1,
+          name: "Dolares",
+          symbol: "US$"
+        },
+        {
+          id: 2,
+          name: "Soles",
+          symbol: "S/"
+        },
+      ],
 
+      // New cars post dialog
       selectedBrand: null,
       selectedYear: null,
       modelName: null,
@@ -86,16 +99,19 @@ export default {
       const endIndex = startIndex + this.itemsPerPage;
       return this.posts.slice(startIndex, endIndex);
     },
-    getVehicle(vehicleId: Number){
+    getVehicle(vehicleId){
       return this.vehicles.find(vehicle => vehicle.id === vehicleId);
     },
-    getVehicleBrand(vehicleId: Number){
+    getVehicleBrand(vehicleId){
       const vehicleBrandId = this.vehicles.find(vehicle => vehicle.id === vehicleId).vehicle_brand_id;
       return this.vehicle_brands.find(vehicle_brand => vehicle_brand.id === vehicleBrandId);
     },
-    getEmployeeProfile(employeeProfileId: Number){
+    getEmployeeProfile(employeeProfileId){
       return this.employee_profiles.find(employee_profile => employee_profile.id === employeeProfileId);
-    }
+    },
+    getCurrency(currencyId){
+      return this.currencies.find(currency => currency.id === currencyId);
+    },
   },
 };
 </script>
@@ -104,11 +120,7 @@ export default {
   <div class="container mx-auto">
     <div v-if="posts">
       <div class="flex flex-col items-center gap-8 py-8">
-        <div>
-          <button class="btn-fill px-8 rounded" @click="newCarPostDialog=true">
-            Publicar carro
-          </button>
-        </div>
+        <Button @click="newCarPostDialog=true">Nueva publicación</Button>
         <div class="flex flex-wrap justify-center gap-12">
           <PostManagementCard
               v-for="post in calculateCurrentPageItems()"
@@ -117,6 +129,9 @@ export default {
               :vehicle=getVehicle(post.vehicle_id)
               :vehicleBrand=getVehicleBrand(post.vehicle_id)
               :employee_profile=getEmployeeProfile(post.created_by)
+              :currency="getCurrency(post.currency_id)"
+              :vehicle_brands="this.vehicle_brands"
+              :currencies = "this.currencies"
           />
         </div>
         <div class="flex gap-4">
@@ -129,27 +144,29 @@ export default {
       <LoadingSpinner />
     </div>
   </div>
+
   <Dialog v-model:visible="newCarPostDialog" header="Agregar carro" modal class="w-full md:w-1/3">
-    <div class="grid gap-2">
+    <form class="grid gap-2">
       <p class="text-lg text-gray-400 font-medium">Todos los campos son obligatorios</p>
-      <div class="flex gap-2">
-        <Dropdown v-model="selectedBrand" :options="vehicle_brands" optionLabel="name" placeholder="Marca" class="w-full" />
-        <Calendar v-model="selectedYear" view="year" dateFormat="yy" class="w-full" />
-      </div>
-      <div class="grid">
-        <label for="modelName" class="text-sm">Modelo</label>
-        <InputText id="modelName" v-model="modelName" aria-describedby="username-help" />
+      <div class="grid w-full">
+        <label class="text-sm">Vehículos</label>
+        <Dropdown v-model="selectedCar" :options="vehicles" optionLabel="model" placeholder="Selecciona vehículo" class="w-full" />
       </div>
       <div class="flex gap-2">
-        <div class="grid">
-          <label for="modelName" class="text-sm">Modelo</label>
-          <InputText id="modelName" v-model="modelName" aria-describedby="username-help" />
+        <div class="grid w-full">
+          <label for="selectedCurrency" class="text-sm">Moneda</label>
+          <Dropdown v-model="selectedCurrency" :options="currencies" optionLabel="symbol" placeholder="Selecciona moneda" class="w-full" />
         </div>
-        <div class="grid">
-          <label for="price" class="text-sm">Precio</label>
-          <InputText id="price" v-model="selectedPrice" aria-describedby="username-help" />
+        <div class="grid w-full">
+          <label for="selectedPrice" class="text-sm">Precio</label>
+          <InputText id="selectedPrice" v-model="selectedPrice" aria-describedby="username-help" />
         </div>
       </div>
-    </div>
+      <div class="grid w-full">
+        <label for="description" class="text-sm">Descripción</label>
+        <Textarea v-model="description" rows="5" cols="30" />
+      </div>
+      <Button type="submit" label="Publicar" class="w-full" />
+    </form>
   </Dialog>
 </template>

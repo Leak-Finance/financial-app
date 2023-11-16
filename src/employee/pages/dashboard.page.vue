@@ -1,6 +1,7 @@
 <script>
 import LoadingSpinner from '../../shared/components/loading-spinner.component.vue';
 import PostManagementCard from "@/employee/components/post-management-card.component.vue";
+import {HttpsService} from "@/shared/services/http.service";
 export default {
   name: 'EmployeeDashboardPage',
   components: {
@@ -9,78 +10,15 @@ export default {
   },
   data() {
     return {
+      httpService: new HttpsService(),
       currentPage: 1,
       itemsPerPage: 9,
       newCarPostDialog: false,
-      posts: [
-        {
-          id: 1,
-          description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-          created_at: "2021-10-10",
-          updated_at: "2021-10-10",
-          created_by: 1,
-          price: 20000,
-          vehicle_id: 1,
-          currency_id: 1, // 1 dollar 2 soles
-        },
-        {
-          id: 2,
-          description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-          created_at: "2021-10-10",
-          updated_at: "2021-10-10",
-          created_by: 1,
-          price: 20000,
-          vehicle_id: 1,
-          currency_id: 1, // 1 dollar 2 soles
-        },
-        {
-          id: 3,
-          description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-          created_at: "2021-10-10",
-          updated_at: "2021-10-10",
-          created_by: 1,
-          price: 20000,
-          vehicle_id: 1,
-          currency_id: 1, // 1 dollar 2 soles
-        },
-      ],
-      vehicles: [
-        {
-          id: 1,
-          model: "Modelo 1",
-          manufacture_year: 2023,
-          photo_url: "https://stimg.cardekho.com/images/carexteriorimages/630x420/Nissan/X-Trail/3372/1666087743726/front-left-side-47.jpg",
-          vehicle_brand_id: 1
-        },
-      ],
-      vehicle_brands: [
-        {
-          id: 1,
-          name: "Nissan",
-        },
-      ],
-      employee_profiles: [
-        {
-          id: 1,
-          first_name: "Juan",
-          last_name: "Perez",
-          business_email: "perez@gmail.com",
-          organizational_users_id: 1,
-          profile_url: 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png'
-        },
-      ],
-      currencies : [
-        {
-          id: 1,
-          name: "Dolares",
-          symbol: "US$"
-        },
-        {
-          id: 2,
-          name: "Soles",
-          symbol: "S/"
-        },
-      ],
+      posts: [],
+      vehicles: [],
+      vehicle_brands: [],
+      employee_profiles: [],
+      currencies : [],
 
       // New cars post dialog
       selectedBrand: null,
@@ -92,6 +30,18 @@ export default {
     };
   },
   created() {
+    this.httpService.getAll('vehicle-retail/vehicle-posts').then(response => {
+      this.posts = response.data;
+    }).catch(error => {console.log(error);});
+    this.httpService.getAll('vehicle-retail/vehicle-brands').then(response => {
+      this.vehicle_brands = response.data;
+    }).catch(error => {console.log(error);});
+    this.httpService.getAll('vehicle-retail/currencies').then(response => {
+      this.currencies = response.data;
+    }).catch(error => {console.log(error);});
+    this.httpService.getAll('vehicle-retail/vehicles').then(response => {
+      this.vehicles = response.data;
+    }).catch(error => {console.log(error);});
   },
   methods: {
     calculateCurrentPageItems() {
@@ -103,7 +53,7 @@ export default {
       return this.vehicles.find(vehicle => vehicle.id === vehicleId);
     },
     getVehicleBrand(vehicleId){
-      const vehicleBrandId = this.vehicles.find(vehicle => vehicle.id === vehicleId).vehicle_brand_id;
+      const vehicleBrandId = this.vehicles.find(vehicle => vehicle.id === vehicleId).brand.id;
       return this.vehicle_brands.find(vehicle_brand => vehicle_brand.id === vehicleBrandId);
     },
     getEmployeeProfile(employeeProfileId){
@@ -130,7 +80,6 @@ export default {
               :vehicleBrand=getVehicleBrand(post.vehicle_id)
               :employee_profile=getEmployeeProfile(post.created_by)
               :currency="getCurrency(post.currency_id)"
-              :vehicle_brands="this.vehicle_brands"
               :currencies = "this.currencies"
           />
         </div>

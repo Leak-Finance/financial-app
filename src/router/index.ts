@@ -5,7 +5,6 @@ import LoginEmployeeForm from "../authentication/pages/login-employee-form.page.
 import RegisterFormPage from "../authentication/pages/register-form.page.vue";
 import EmployeeDashboardPage from "../employee/pages/dashboard.page.vue";
 
-
 const router = createRouter({
   history: createWebHistory(),
   routes: [

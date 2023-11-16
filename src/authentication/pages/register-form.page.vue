@@ -1,13 +1,14 @@
-<script  lang="ts">
+<script>
+import {AuthService} from "@/authentication/services/auth.service";
+import { useToast } from 'primevue/usetoast';
 export default {
   name: 'RegisterFormPage',
   components: {},
   data() {
     return {
-      errorMessage: '',         // TODO: to show if there is an error in the form
-      name: '',
-      username: '',
-      password: '',
+      toast: useToast(),
+      authService: new AuthService(),
+      errorMessage: '',
       avatarUrl: 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png',
       visible:false,
       avatars: [
@@ -26,7 +27,13 @@ export default {
         'https://www.svgrepo.com/show/420331/avatar-lazybones-sloth.svg',
         'https://www.svgrepo.com/show/420324/beard-hipster-male.svg',
         'https://www.svgrepo.com/show/420355/animal-avatar-mutton.svg',
-      ]
+      ],
+      email: '',
+      password: '',
+      dni: '',
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
     }
   },
   /*
@@ -39,8 +46,20 @@ export default {
   },
   */
   methods: {
-    register() {
-      this.errorMessage = '';
+    register(email, password, dni, firstName, lastName, phoneNumber) {
+      this.authService.signUpCustomers(email, password, dni, firstName, lastName, phoneNumber).then((response) => {
+        this.$toast.add({
+          severity: "success",
+          summary: "Success",
+          detail: `${response.data.message}. Redirecting to login...`,
+          life: 3000
+        });
+        setTimeout(() => {
+          this.$router.push("/dashboard");
+        }, 3000);
+      }).catch((error) => {
+        this.errorMessage = error.response.data.message;
+      });
     },
     resetErrorMessage() {
       this.errorMessage = '';
@@ -54,6 +73,8 @@ export default {
 </script>
 
 <template>
+  <Toast />
+
   <Dialog v-model:visible="visible" modal :style="{ width: '50vw' }"
           header="Escoge un avatar" >
     <div class="flex flex-wrap gap-8">
@@ -141,3 +162,4 @@ export default {
     </div>
   </div>
 </template>
+

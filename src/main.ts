@@ -24,11 +24,19 @@ import Tag from 'primevue/tag';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
+import Calendar from 'primevue/calendar';
+import Textarea from 'primevue/textarea';
+
+import ToastService from 'primevue/toastservice';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+
 
 createApp(App)
     .use(createPinia())
     .use(PrimeVue, { ripple: true, Tailwind })
     .use(router)
+    .use(ToastService)
     .component('InlineMessage', InlineMessage)
     .component('InputText', InputText)
     .component('Button', Button)
@@ -41,4 +49,7 @@ createApp(App)
     .component('DataTable', DataTable)
     .component('Column', Column)
     .component('Dialog', Dialog)
+    .component('Calendar', Calendar)
+    .component('Textarea', Textarea)
+    .component('Toast', Toast)
     .mount('#app')

@@ -91,7 +91,7 @@ export default {
     </div>
   </Dialog>
 
-  <div class="grid md:flex items-center md:text-justify h-screen overflow-hidden">
+  <div class="grid md:flex items-center md:text-justify overflow-hidden">
     <form @submit.prevent="register(this.email, this.password, this.dni, this.firstName, this.lastName, this.phoneNumber, this.photoUrl)"
           class="grid gap-8 justify-center p-8 md:w-1/2">
       <h1 class="text-6xl font-bold text-primary">

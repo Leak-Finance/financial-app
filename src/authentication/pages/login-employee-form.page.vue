@@ -41,7 +41,7 @@ export default {
 </script>
 
 <template>
-  <div class="grid md:flex items-center text-center md:text-justify h-screen overflow-hidden">
+  <div class="grid md:flex items-center text-center md:text-justify overflow-hidden">
     <form @submit.prevent="login" class="grid gap-8 justify-center p-8 md:w-1/2">
       <img class="w-32 h-auto" src="../../assets/finance-employee-logo.png" alt="Employee Logo">
       <p>
@@ -55,7 +55,7 @@ export default {
       <div class="grid gap-2 md:w-[600px]">
         <div class="flex flex-col gap-1">
           <label for="username">
-            Username
+            Usuario
           </label>
           <InputText
               class="px-2 py-3 border rounded"
@@ -63,7 +63,7 @@ export default {
               v-model="username"
               type="text"
               aria-describedby="username-help"
-              placeholder="Ingresa username"
+              placeholder="Ingresa tu usuario"
               @input="resetErrorMessage" />
         </div>
         <div class="flex flex-col gap-1">
@@ -76,7 +76,7 @@ export default {
               type="password"
               v-model="password"
               aria-describedby="username-help"
-              placeholder="Ingresa contraseña"
+              placeholder="Ingresa tu contraseña"
               @input="resetErrorMessage" />
         </div>
         <p class="text-red-700" v-if="errorMessage">

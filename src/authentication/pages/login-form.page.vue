@@ -41,7 +41,7 @@ export default {
 </script>
 
 <template>
-  <div class="grid md:flex flex-wrap items-center text-center md:text-justify h-screen overflow-hidden">
+  <div class="grid md:flex flex-wrap items-center place-content-center text-center md:text-justify overflow-hidden">
     <img class="hidden sm:block md:w-1/2 w-full" src="../../assets/login-image.png" alt="Login clients image">
     <form @submit.prevent="login" class="grid gap-8 justify-center p-8 w-full md:w-1/2">
       <h1 class="text-6xl font-bold text-primary">
@@ -66,7 +66,7 @@ export default {
               v-model="email"
               type="text"
               aria-describedby="username-help"
-              placeholder="Ingresa correo"
+              placeholder="Ingresa tu correo"
               @input="resetErrorMessage" />
         </div>
         <div class="flex flex-col gap-1">
@@ -79,7 +79,7 @@ export default {
               type="password"
               v-model="password"
               aria-describedby="username-help"
-              placeholder="Ingresa contraseña"
+              placeholder="Ingresa tu contraseña"
               @input="resetErrorMessage" />
         </div>
         <p class="text-red-700" v-if="errorMessage">

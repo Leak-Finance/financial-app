@@ -2,6 +2,12 @@
 export default {
   name: 'PostManagementCard',
   props: {
+    post: {
+      type: Object,
+      required: true,
+    },
+
+    // Objects
     vehicle: {
       type: Object,
       required: true,
@@ -10,19 +16,18 @@ export default {
       type: Object,
       required: true,
     },
+    currency: {
+      type: Object,
+      required: true,
+    },
+
+    // Employee profile
     employee_profile: {
       type: Object,
       required: true,
     },
 
-    post: {
-      type: Object,
-      required: true,
-    },
-    currency: {
-      type: Object,
-      required: true,
-    },
+    // For editing
     currencies : {
       type: Array,
       required: true,
@@ -52,22 +57,24 @@ export default {
     },
   },
   computed: {
-    truncatedDescription() {
-      const maxWords = 12;
-      const words = this.post.description.split(' ');
-      if (words.length > maxWords) {
-        return words.slice(0, maxWords).join(' ') + '...';
-      } else {
-        return this.post.description;
-      }
-    },
     truncatedModel() {
       const maxWords = 5;
-      const words = this.vehicle.model.split(' ');
+      const model = this.vehicle.model || '';
+      const words = model.split(' ');
       if (words.length > maxWords) {
         return words.slice(0, maxWords).join(' ') + '...';
       } else {
-        return this.vehicle.model;
+        return model;
+      }
+    },
+    truncatedDescription() {
+      const maxWords = 20;
+      const description = this.post.description || '';
+      const words = description.split(' ');
+      if (words.length > maxWords) {
+        return words.slice(0, maxWords).join(' ') + '...';
+      } else {
+        return description;
       }
     },
   },
@@ -85,13 +92,11 @@ export default {
               {{vehicleBrand.name}}
             </p>
             <p class="text-lg whitespace-normal">
-              <span>{{truncatedModel}} {{vehicle.manufacture_year}}</span>
+              <span>{{truncatedModel}} {{vehicle.manufactureYear}}</span>
             </p>
           </div>
           <p class="font-bold text-tertiary text-2xl">
-            <span v-if="post.currency_id === 1">US$</span>
-            <span v-if="post.currency_id === 2">S/</span>
-            {{post.price.toLocaleString() }}
+            {{ currency.symbol }}{{post.price }}
           </p>
         </div>
         <p>{{ truncatedDescription }}</p>
@@ -186,7 +191,3 @@ export default {
     </div>
   </Dialog>
 </template>
-
-<style scoped>
-
-</style>

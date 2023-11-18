@@ -28,7 +28,6 @@ export default {
     const user = localStorage.getItem("user");
     if (user) {
       this.setUser(JSON.parse(user));
-      this.user = JSON.parse(user);
     }
   },
   computed: {

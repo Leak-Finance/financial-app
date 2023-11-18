@@ -1,15 +1,18 @@
-<script lang="ts">
+<script>
+import {useUserStore} from "@/authentication/services/user-store.store";
+import {AuthService} from "@/authentication/services/auth.service";
+
 export default {
   name: 'LoginEmployeeFormPage',
   components: {},
   data() {
     return {
+      authApi: new AuthService(),
       errorMessage: '',
       username: '',
       password: '',
     }
   },
-  /*
   setup() {
     const userStore = useUserStore();
     const setUser = (user) => {
@@ -17,10 +20,18 @@ export default {
     };
     return { setUser };
   },
-  */
   methods: {
     login() {
-      this.errorMessage = '';
+      event.preventDefault();
+      this.authApi.signInEmployees(this.username, this.password)
+          .then(res => {
+            if (res.data.token) {
+              localStorage.setItem('user', JSON.stringify(res.data));
+              this.setUser(res.data);
+              this.$router.push("/dashboard")
+            }
+          })
+          .catch(error => this.errorMessage = error.response.data.message[0]);
     },
     resetErrorMessage() {
       this.errorMessage = '';
@@ -35,7 +46,7 @@ export default {
       <img class="w-32 h-auto" src="../../assets/finance-employee-logo.png" alt="Employee Logo">
       <p>
         ¿No eres empleado?
-        <router-link to="login">
+        <router-link to="/">
           <span class="font-medium underline hover:text-secondary duration-200">
             Iniciar sesión como cliente
           </span>
@@ -91,7 +102,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style scoped>
-
-</style>

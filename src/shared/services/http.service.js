@@ -8,8 +8,4 @@ export class HttpsService {
     getAll(endpoint) {
         return http.get(endpoint);
     }
-
-    create(endpoint, data) {
-        return http.post(endpoint, data);
-    }
 }

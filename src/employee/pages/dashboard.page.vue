@@ -1,16 +1,17 @@
 <script>
-import LoadingSpinner from '../../shared/components/loading-spinner.component.vue';
 import PostManagementCard from "@/employee/components/post-management-card.component.vue";
 import {HttpsService} from "@/shared/services/http.service";
+import {VehicleRetailService} from "@/shared/services/vehicle-retail.service";
+import {useUserStore} from "@/authentication/services/user-store.store";
 export default {
   name: 'EmployeeDashboardPage',
   components: {
     PostManagementCard,
-    LoadingSpinner
   },
   data() {
     return {
       httpService: new HttpsService(),
+      vehicleRetailService: new VehicleRetailService(),
       currentPage: 1,
       itemsPerPage: 9,
       newCarPostDialog: false,
@@ -20,47 +21,68 @@ export default {
       employee_profiles: [],
       currencies : [],
 
+      errorMessage: '',
+
       // New cars post dialog
-      selectedBrand: null,
-      selectedYear: null,
-      modelName: null,
-      selectedCurrency:null,
-      selectedPrice: null,
-      description: null,
+      description: '',
+      price: 0,
+      vehicle: {},
+      currency: {},
     };
   },
   created() {
-    this.httpService.getAll('vehicle-retail/vehicle-posts').then(response => {
-      this.posts = response.data;
-    }).catch(error => {console.log(error);});
-    this.httpService.getAll('vehicle-retail/vehicle-brands').then(response => {
-      this.vehicle_brands = response.data;
-    }).catch(error => {console.log(error);});
-    this.httpService.getAll('vehicle-retail/currencies').then(response => {
-      this.currencies = response.data;
-    }).catch(error => {console.log(error);});
-    this.httpService.getAll('vehicle-retail/vehicles').then(response => {
+    this.vehicleRetailService.getAllVehicles().then(response => {
       this.vehicles = response.data;
     }).catch(error => {console.log(error);});
+    this.vehicleRetailService.getAllVehiclePosts().then(response => {
+      this.posts = response.data;
+    }).catch(error => {console.log(error);});
+    this.vehicleRetailService.getAllVehicleBrands().then(response => {
+      this.vehicle_brands = response.data;
+    }).catch(error => {console.log(error);});
+    this.vehicleRetailService.getAllCurrencies().then(response => {
+      this.currencies = response.data;
+    }).catch(error => {console.log(error);});
+  },
+  computed: {
+    user() {
+      return useUserStore().user;
+    },
+    isAuthenticated() {
+      return useUserStore().isAuthenticated;
+    },
   },
   methods: {
+    resetErrorMessage() {
+      this.errorMessage = '';
+    },
     calculateCurrentPageItems() {
       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
       const endIndex = startIndex + this.itemsPerPage;
       return this.posts.slice(startIndex, endIndex);
     },
-    getVehicle(vehicleId){
-      return this.vehicles.find(vehicle => vehicle.id === vehicleId);
+    getEmployeeProfile(){
+      return this.user.profile;
     },
-    getVehicleBrand(vehicleId){
-      const vehicleBrandId = this.vehicles.find(vehicle => vehicle.id === vehicleId).brand.id;
-      return this.vehicle_brands.find(vehicle_brand => vehicle_brand.id === vehicleBrandId);
+    createVehiclePost(){
+      this.vehicleRetailService.createVehiclePost(
+          this.description,
+          this.price,
+          this.user.profile.id,
+          this.vehicle.id,
+          this.currency.id
+      ).then(() => {
+        this.newCarPostDialog = false;
+        this.refreshPosts();
+      }).catch(error => this.errorMessage = error.response.data.message[0]);
     },
-    getEmployeeProfile(employeeProfileId){
-      return this.employee_profiles.find(employee_profile => employee_profile.id === employeeProfileId);
+    refreshPosts(){
+      this.vehicleRetailService.getAllVehiclePosts().then(response => {
+        this.posts = response.data;
+      }).catch(error => {console.log(error);});
     },
-    getCurrency(currencyId){
-      return this.currencies.find(currency => currency.id === currencyId);
+    deletePost(postId){
+      this.posts = this.posts.filter(post => post.id !== postId);
     },
   },
 };
@@ -68,54 +90,57 @@ export default {
 
 <template>
   <div class="container mx-auto">
-    <div v-if="posts">
-      <div class="flex flex-col items-center gap-8 py-8">
-        <Button @click="newCarPostDialog=true">Nueva publicación</Button>
-        <div class="flex flex-wrap justify-center gap-12">
-          <PostManagementCard
-              v-for="post in calculateCurrentPageItems()"
-              :post="post"
-              :key="post.id"
-              :vehicle=getVehicle(post.vehicle_id)
-              :vehicleBrand=getVehicleBrand(post.vehicle_id)
-              :employee_profile=getEmployeeProfile(post.created_by)
-              :currency="getCurrency(post.currency_id)"
-              :currencies = "this.currencies"
-          />
-        </div>
-        <div class="flex gap-4">
-          <Button @click="currentPage -= 1" :disabled="currentPage === 1" icon="pi pi-angle-left" outlined severity="info" />
-          <Button @click="currentPage += 1" :disabled="currentPage === Math.ceil(posts.length / itemsPerPage)" icon="pi pi-angle-right" outlined severity="info" />
-        </div>
+    <div class="flex flex-col items-center gap-8 py-8">
+      <Button @click="newCarPostDialog=true"
+              label="Nueva publicación"
+              icon="pi pi-plus" severity="success"
+              class="w-full md:w-1/4" />
+      <div v-if="posts.length>0" class="flex flex-wrap justify-center gap-12">
+        <PostManagementCard
+            v-for="post in calculateCurrentPageItems()"
+            :post="post"
+            :key="post.id"
+            :employee_profile=getEmployeeProfile()
+            :currencies = "this.currencies"
+            @refresh-posts="refreshPosts"
+        />
       </div>
-    </div>
-    <div v-else>
-      <LoadingSpinner />
+      <div v-else>
+        <p>No hay publicaciones</p>
+      </div>
+      <div class="flex gap-4">
+        <Button @click="currentPage -= 1" :disabled="currentPage === 1" icon="pi pi-angle-left" outlined severity="info" />
+        <Button @click="currentPage += 1" :disabled="currentPage === Math.ceil(posts.length / itemsPerPage)" icon="pi pi-angle-right" outlined severity="info" />
+      </div>
     </div>
   </div>
 
   <Dialog v-model:visible="newCarPostDialog" header="Agregar carro" modal class="w-full md:w-1/3">
-    <form class="grid gap-2">
+    <form class="grid gap-2"
+          @submit.prevent="createVehiclePost">
       <p class="text-lg text-gray-400 font-medium">Todos los campos son obligatorios</p>
       <div class="grid w-full">
         <label class="text-sm">Vehículos</label>
-        <Dropdown v-model="selectedCar" :options="vehicles" optionLabel="model" placeholder="Selecciona vehículo" class="w-full" />
+        <Dropdown v-model="vehicle" :options="vehicles" optionLabel="model" placeholder="Selecciona vehículo" class="w-full" />
       </div>
       <div class="flex gap-2">
         <div class="grid w-full">
           <label for="selectedCurrency" class="text-sm">Moneda</label>
-          <Dropdown v-model="selectedCurrency" :options="currencies" optionLabel="symbol" placeholder="Selecciona moneda" class="w-full" />
+          <Dropdown v-model="currency" :options="currencies" optionLabel="symbol" placeholder="Selecciona moneda" class="w-full" />
         </div>
         <div class="grid w-full">
           <label for="selectedPrice" class="text-sm">Precio</label>
-          <InputText id="selectedPrice" v-model="selectedPrice" aria-describedby="username-help" />
+          <InputText id="selectedPrice" v-model="price" aria-describedby="username-help" @input="resetErrorMessage" />
         </div>
       </div>
       <div class="grid w-full">
         <label for="description" class="text-sm">Descripción</label>
-        <Textarea v-model="description" rows="5" cols="30" />
+        <Textarea v-model="description" rows="5" cols="30" @input="resetErrorMessage" />
       </div>
-      <Button type="submit" label="Publicar" class="w-full" />
+      <p class="text-red-700" v-if="errorMessage">
+        {{ errorMessage }}
+      </p>
+      <Button type="submit" label="Publicar" class="w-full"  />
     </form>
   </Dialog>
 </template>

@@ -61,27 +61,8 @@ export default {
       const endIndex = startIndex + this.itemsPerPage;
       return this.posts.slice(startIndex, endIndex);
     },
-    getVehicle(vehicleId){
-      return this.vehicleRetailService.getVehicleById(vehicleId).then(response => {
-        return response.data;
-      }).catch(error => {console.log(error);});
-    },
-    getVehicleBrand(vehicleId){
-      return this.vehicleRetailService.getVehicleById(vehicleId).then(response => {
-        const vehicle = response.data;
-        console.log(vehicle.id);
-        return this.vehicleRetailService.getVehicleBrandById(vehicle.id).then(response => {
-          return response.data;
-        }).catch(error => {console.log(error);});
-      }).catch(error => {console.log(error);});
-    },
     getEmployeeProfile(){
       return this.user.profile;
-    },
-    getCurrency(currencyId){
-      return this.vehicleRetailService.getCurrencyById(currencyId).then(response => {
-        return response.data;
-      }).catch(error => {console.log(error);});
     },
     createVehiclePost(){
       this.vehicleRetailService.createVehiclePost(
@@ -90,11 +71,19 @@ export default {
           this.user.profile.id,
           this.vehicle.id,
           this.currency.id
-      ).then(response => {
-        this.posts.push(response.data);
+      ).then(() => {
         this.newCarPostDialog = false;
+        this.refreshPosts();
       }).catch(error => this.errorMessage = error.response.data.message[0]);
-    }
+    },
+    refreshPosts(){
+      this.vehicleRetailService.getAllVehiclePosts().then(response => {
+        this.posts = response.data;
+      }).catch(error => {console.log(error);});
+    },
+    deletePost(postId){
+      this.posts = this.posts.filter(post => post.id !== postId);
+    },
   },
 };
 </script>
@@ -111,11 +100,10 @@ export default {
             v-for="post in calculateCurrentPageItems()"
             :post="post"
             :key="post.id"
-            :vehicle=getVehicle(post.vehicleId)
-            :vehicleBrand=getVehicleBrand(post.vehicleId)
             :employee_profile=getEmployeeProfile()
-            :currency="getCurrency(post.currencyId)"
-            :currencies = "this.currencies" />
+            :currencies = "this.currencies"
+            @refresh-posts="refreshPosts"
+        />
       </div>
       <div v-else>
         <p>No hay publicaciones</p>

@@ -7,7 +7,3 @@ export default {
 <template>
 <p>Works</p>
 </template>
-
-<style scoped>
-
-</style>

@@ -29,10 +29,11 @@ export class VehicleRetailService {
             currencyId: currencyId
         });
     }
-    updateVehiclePost(vehiclePost) {
-        return http.put(`api/v1/vehicle-retail/vehicle-posts/${vehiclePost.id}`, vehiclePost);
+    updateVehiclePost(id, updatedVehiclePost) {
+        return http.put(`api/v1/vehicle-retail/vehicle-posts/${id}`, updatedVehiclePost);
     }
     deleteVehiclePost(id) {
+        window.location.reload();
         return http.delete(`api/v1/vehicle-retail/vehicle-posts/${id}`);
     }
 

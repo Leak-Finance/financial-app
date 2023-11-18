@@ -54,8 +54,8 @@ export default {
 
         this.$toast.add({
           severity: "success",
-          summary: "Success",
-          detail: `${response.data.message}. Redirecting to login...`,
+          summary: "Éxito",
+          detail: `${response.data.message}. Redirigiendo a la cuenta...`,
           life: 3000
         });
         setTimeout(() => {

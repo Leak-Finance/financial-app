@@ -4,14 +4,15 @@ const http = axios.create({
     baseURL: 'http://localhost:3000/api/v1/'
 });
 export class AuthService {
-    signUpCustomers(email, password, dni, firstName, lastName, phoneNumber) {
+    signUpCustomers(email, password, dni, firstName, lastName, phoneNumber, photoUrl) {
         return http.post('security/auth/customers/sign-up', {
             email: email,
             password: password,
             dni: dni,
             firstName: firstName,
             lastName: lastName,
-            phoneNumber: phoneNumber
+            phoneNumber: phoneNumber,
+            photoUrl: photoUrl
         })
     }
 
@@ -31,9 +32,9 @@ export class AuthService {
         })
     }
 
-    signInEmployees(email, password) {
+    signInEmployees(username, password) {
         return http.post('security/auth/employees/sign-in', {
-            email: email,
+            username: username,
             password: password
         })
     }

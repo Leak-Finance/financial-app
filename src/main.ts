@@ -26,6 +26,7 @@ import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
 import Calendar from 'primevue/calendar';
 import Textarea from 'primevue/textarea';
+import SplitButton from 'primevue/splitbutton';
 
 import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
@@ -52,4 +53,5 @@ createApp(App)
     .component('Calendar', Calendar)
     .component('Textarea', Textarea)
     .component('Toast', Toast)
+    .component('SplitButton', SplitButton)
     .mount('#app')

@@ -1,17 +1,16 @@
-<script lang="ts">
-import { RouterView } from 'vue-router'
-//import {AuthenticationService} from "./authentication/services/authenticationService.service.js";
-//import {useUserStore} from "./authentication/services/user-store.store.js";
+<script>
 
+import {useUserStore} from "@/authentication/services/user-store.store";
+import {FwbDropdown, FwbListGroup, FwbListGroupItem} from 'flowbite-vue'
+import router from "@/router";
 export default {
+  components: {FwbListGroupItem, FwbListGroup, FwbDropdown},
   data() {
     return {
       visibleMobileBar: false,
-      user: null,
       responsiveNavbarVisible: false,
     }
   },
-  /*
   setup() {
     const userStore = useUserStore();
 
@@ -19,36 +18,37 @@ export default {
       userStore.setUser(user);
     };
 
-    return { setUser };
+    const showResponsiveNavbar = () => {
+      this.responsiveNavbarVisible = !this.responsiveNavbarVisible;
+    };
+
+    return { setUser, showResponsiveNavbar };
   },
   created() {
     const user = localStorage.getItem("user");
-    user && this.setUser(JSON.parse(user));
-    this.user = JSON.parse(user);
-  },
-  methods: {
-    isAnAuthenticationPath(path) {
-      return this.authenticationPaths.has(path);
-    },
-    logout() {
-      location.reload();
-      const userStore = useUserStore();
-      userStore.logout();
-    },
-    showResponsiveNavbar(){
-      this.responsiveNavbarVisible = !this.responsiveNavbarVisible;
+    if (user) {
+      this.setUser(JSON.parse(user));
+      this.user = JSON.parse(user);
     }
   },
-  watch: {
-    $route(to, from) {
-      if (!this.user && !this.isAnAuthenticationPath(to.path)) {
-        const user = localStorage.getItem("user");
-        user && this.setUser(JSON.parse(user));
-        this.user = JSON.parse(user);
-      }
+  computed: {
+    user() {
+      return useUserStore().user;
     },
-  }
-  */
+    isAuthenticated() {
+      return useUserStore().isAuthenticated;
+    },
+  },
+  methods: {
+    greeting(){
+      return "Hola, " + this.user.profile.firstName;
+    },
+    logout() {
+      const userStore = useUserStore();
+      userStore.logout();
+      router.push("/");
+    },
+  },
 }
 </script>
 
@@ -62,15 +62,34 @@ export default {
 
       <div class="flex gap-6 items-center">
         <!-- Client navbar -->
-        <div v-if="user">
-          <div class="flex gap-8">
-            <p>Hola, name</p>
-            <p>Cuenta</p> <!-- TODO: dropdown -->
+        <div v-if="user && isAuthenticated">
+          <div class="flex gap-8 font-medium text-lg items-center">
+            <fwb-dropdown :text=greeting()>
+              <fwb-list-group>
+                <fwb-list-group-item>
+                  <div class="flex flex-col items-center gap-2 w-full">
+                    <div v-if="user.profile.photoUrl">
+                      <img class="rounded-full object-cover h-16 w-16"
+                           :src=user.profile.photoUrl alt="Profile picture">
+                    </div>
+                    <div v-else>
+                      <img class="rounded-full object-cover h-16 w-16"
+                           src="https://www.svgrepo.com/show/421195/avatar-business-human.svg" alt="Profile picture">
+                    </div>
+                    <p class="text-lg">{{ user.profile.firstName }}&nbsp;{{ user.profile.lastName }}</p>
+                  </div>
+                </fwb-list-group-item>
+                <fwb-list-group-item class="w-full text-center flex items-center justify-center hover:cursor-pointer"
+                                     @click="logout">
+                  Cerrar sesión
+                </fwb-list-group-item>
+              </fwb-list-group>
+            </fwb-dropdown>
           </div>
         </div>
 
         <!-- TODO: Employee navbar -->
-        <div v-if="user==null">
+        <div v-if="!user && !isAuthenticated">
           <div class="flex gap-8">
             <router-link to="/login">
               <p class="font-medium text-lg hover:text-secondary duration-200">
@@ -91,7 +110,3 @@ export default {
 
   <RouterView />
 </template>
-
-<style scoped>
-
-</style>

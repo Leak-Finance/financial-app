@@ -1,15 +1,18 @@
-<script lang="ts">
+<script>
+import {AuthService} from "@/authentication/services/auth.service";
+import {useUserStore} from "@/authentication/services/user-store.store";
+
 export default {
   name: 'LoginFormPage',
   components: {},
   data() {
     return {
+      authApi: new AuthService(),
       errorMessage: '',
-      username: '',
+      email: '',
       password: '',
     }
   },
-  /*
   setup() {
     const userStore = useUserStore();
     const setUser = (user) => {
@@ -17,10 +20,18 @@ export default {
     };
     return { setUser };
   },
-  */
   methods: {
     login() {
-      this.errorMessage = '';
+      event.preventDefault();
+      this.authApi.signInCustomers(this.email, this.password)
+          .then(res => {
+            if (res.data.token) {
+              localStorage.setItem('user', JSON.stringify(res.data));
+              this.setUser(res.data);
+              this.$router.push("/catalog");
+            }
+          })
+          .catch(error => this.errorMessage = error.response.data.message[0]);
     },
     resetErrorMessage() {
       this.errorMessage = '';
@@ -31,9 +42,7 @@ export default {
 
 <template>
   <div class="grid md:flex flex-wrap items-center text-center md:text-justify h-screen overflow-hidden">
-    <div class="hidden sm:block md:w-1/2 w-full">
-      <img class="w-auto rounded" src="../../assets/login-image.png" alt="Login clients image">
-    </div>
+    <img class="hidden sm:block md:w-1/2 w-full" src="../../assets/login-image.png" alt="Login clients image">
     <form @submit.prevent="login" class="grid gap-8 justify-center p-8 w-full md:w-1/2">
       <h1 class="text-6xl font-bold text-primary">
         Bienvenido
@@ -54,7 +63,7 @@ export default {
           <InputText
               class="px-2 py-3 border rounded"
               id="username"
-              v-model="username"
+              v-model="email"
               type="text"
               aria-describedby="username-help"
               placeholder="Ingresa correo"
@@ -78,7 +87,7 @@ export default {
         </p>
       </div>
       <div class="grid gap-4 items-center text-center">
-        <button class="btn-filled py-4 bg-secondary" type="submit">
+        <button class="btn-filled py-4 bg-secondary font-bold text-white" type="submit">
           Iniciar sesión
         </button>
         <p>
@@ -93,7 +102,3 @@ export default {
     </form>
   </div>
 </template>
-
-<style scoped>
-
-</style>

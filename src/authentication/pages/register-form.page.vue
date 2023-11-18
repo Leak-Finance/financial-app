@@ -1,6 +1,7 @@
 <script>
 import {AuthService} from "@/authentication/services/auth.service";
 import { useToast } from 'primevue/usetoast';
+import {useUserStore} from "@/authentication/services/user-store.store";
 export default {
   name: 'RegisterFormPage',
   components: {},
@@ -9,7 +10,6 @@ export default {
       toast: useToast(),
       authService: new AuthService(),
       errorMessage: '',
-      avatarUrl: 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png',
       visible:false,
       avatars: [
         'https://cdn-icons-png.flaticon.com/512/3177/3177440.png',
@@ -34,20 +34,24 @@ export default {
       firstName: '',
       lastName: '',
       phoneNumber: '',
+      photoUrl: 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png',
     }
   },
-  /*
   setup() {
     const userStore = useUserStore();
     const setUser = (user) => {
-      userStore.setUser(user);
+      userStore.setCustomerUser(user);
     };
     return { setUser };
   },
-  */
   methods: {
-    register(email, password, dni, firstName, lastName, phoneNumber) {
-      this.authService.signUpCustomers(email, password, dni, firstName, lastName, phoneNumber).then((response) => {
+    register(email, password, dni, firstName, lastName, phoneNumber, photoUrl) {
+      this.authService.signUpCustomers(email, password, dni, firstName, lastName, phoneNumber, photoUrl).then((response) => {
+        if (response.data.token) {
+          localStorage.setItem('user', JSON.stringify(res.data));
+        }
+        this.setUser(response.data);
+
         this.$toast.add({
           severity: "success",
           summary: "Success",
@@ -55,17 +59,17 @@ export default {
           life: 3000
         });
         setTimeout(() => {
-          this.$router.push("/dashboard");
+          this.$router.push("/catalog");
         }, 3000);
       }).catch((error) => {
-        this.errorMessage = error.response.data.message;
+        this.errorMessage = error.response.data.message[0];
       });
     },
     resetErrorMessage() {
       this.errorMessage = '';
     },
     changeAvatar(selectedAvatarUrl){
-      this.avatarUrl = selectedAvatarUrl;
+      this.photoUrl = selectedAvatarUrl;
       this.visible = false;
     }
   },
@@ -88,46 +92,90 @@ export default {
   </Dialog>
 
   <div class="grid md:flex items-center md:text-justify h-screen overflow-hidden">
-    <form @submit.prevent="register" class="grid gap-8 justify-center p-8 md:w-1/2">
+    <form @submit.prevent="register(this.email, this.password, this.dni, this.firstName, this.lastName, this.phoneNumber, this.photoUrl)"
+          class="grid gap-8 justify-center p-8 md:w-1/2">
       <h1 class="text-6xl font-bold text-primary">
         Registro
       </h1>
       <div class="grid gap-2 md:w-[600px]">
         <div class="flex flex-col gap-1 items-center justify-center" @click="visible = true">
-          <label for="username">
+          <label for="photoUrl">
             Escoge una avatar
           </label>
           <img class="h-32 w-32 rounded-full border border-secondary hover:cursor-pointer hover:scale-95 duration-200"
-               :src="avatarUrl" alt="Avatar image">
+               :src="photoUrl" alt="Avatar image">
+        </div>
+        <div class="flex gap-2">
+          <div class="flex flex-col gap-1 w-full">
+            <label for="name">
+              Nombre
+            </label>
+            <InputText
+                class="px-2 py-3 border rounded"
+                id="name"
+                v-model="firstName"
+                type="text"
+                aria-describedby="username-help"
+                placeholder="Ingresa tu nombre"
+                @input="resetErrorMessage" />
+          </div>
+          <div class="flex flex-col gap-1 w-full">
+            <label for="lastName">
+              Apellidos
+            </label>
+            <InputText
+                class="px-2 py-3 border rounded"
+                id="lastName"
+                v-model="lastName"
+                type="text"
+                aria-describedby="username-help"
+                placeholder="Ingresa tus apellidos"
+                @input="resetErrorMessage" />
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <div class="flex flex-col gap-1 w-full">
+            <label for="dni">
+              DNI
+            </label>
+            <InputText
+                class="px-2 py-3 border rounded"
+                id="name"
+                v-model="dni"
+                type="text"
+                aria-describedby="username-help"
+                placeholder="Ingresa DNI"
+                @input="resetErrorMessage" />
+          </div>
+          <div class="flex flex-col gap-1 w-full">
+            <label for="phoneNumber">
+              Número de teléfono
+            </label>
+            <InputText
+                class="px-2 py-3 border rounded"
+                id="phoneNumber"
+                v-model="phoneNumber"
+                type="text"
+                aria-describedby="username-help"
+                placeholder="Ingresa número de teléfono"
+                @input="resetErrorMessage" />
+          </div>
         </div>
         <div class="flex flex-col gap-1">
-          <label for="username">
-            Nombre
-          </label>
-          <InputText
-              class="px-2 py-3 border rounded"
-              id="name"
-              v-model="name"
-              type="text"
-              aria-describedby="username-help"
-              placeholder="Ingresa tu nombre"
-              @input="resetErrorMessage" />
-        </div>
-        <div class="flex flex-col gap-1">
-          <label for="username">
+          <label for="email">
             Correo
           </label>
           <InputText
               class="px-2 py-3 border rounded"
-              id="username"
-              v-model="username"
+              id="email"
+              v-model="email"
               type="text"
               aria-describedby="username-help"
               placeholder="Ingresa correo"
               @input="resetErrorMessage" />
         </div>
         <div class="flex flex-col gap-1">
-          <label for="username">
+          <label for="password">
             Contraseña
           </label>
           <InputText

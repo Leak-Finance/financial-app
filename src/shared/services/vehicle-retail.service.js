@@ -13,6 +13,14 @@ export class VehicleRetailService {
         return http.get(`api/v1/vehicle-retail/vehicles/${id}`);
     }
 
+    createVehicle(model, manufactureYear, photoUrl, brandId) {
+        return http.post(`api/v1/vehicle-retail/vehicles/brand/${brandId}`, {
+            model: model,
+            manufactureYear: manufactureYear,
+            photoUrl: photoUrl
+        });
+    }
+
     // Posts
     getAllVehiclePosts() {
         return http.get('api/v1/vehicle-retail/vehicle-posts');

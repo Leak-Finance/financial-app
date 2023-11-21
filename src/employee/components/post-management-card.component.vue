@@ -136,7 +136,8 @@ export default {
   </div>
 
 
-  <Dialog v-model:visible="editDialogVisible" modal :header=post.vehicle.model class="w-full md:w-1/3">
+  <Dialog v-model:visible="editDialogVisible" modal :header=post.vehicle.model
+          :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
     <form class="grid gap-2" @submit.prevent="editPost">
       <p class="text-lg text-gray-400 font-medium">Editar publicación</p>
       <div class="flex gap-2">
@@ -165,7 +166,7 @@ export default {
   </Dialog>
 
   <Dialog v-model:visible="deleteDialogVisible" modal
-          class="w-96"
+          :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
           header="Eliminar carro">
     <form class="grid gap-2" @submit.prevent="deletePost">
       <p>
@@ -188,7 +189,7 @@ export default {
 
 
   <Dialog v-model:visible="detailsDialogVisible" modal
-          class="w-96"
+          :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
           :header=post.vehicle.model >
     <div class="grid gap-1 mb-6">
       <p>

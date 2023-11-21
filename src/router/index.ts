@@ -26,7 +26,7 @@ router.beforeEach((to, from, next) => {
   const customerRoutes = ['/catalog'];
   const employeeRoutes = ['/dashboard'];
 
-  console.log(to.path, userStore.isAuthenticated, userStore.isCustomer, userStore.isEmployee)
+  // console.log(to.path, userStore.isAuthenticated, userStore.isCustomer, userStore.isEmployee)
 
   if (to.path === '/') {
     // Handle the default path ("/")

@@ -2,8 +2,9 @@ import './style.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import App from './App.vue';
 
-import App from './App.vue'
+
 import router from './router'
 
 import PrimeVue from "primevue/config";
@@ -27,11 +28,11 @@ import Dialog from 'primevue/dialog';
 import Calendar from 'primevue/calendar';
 import Textarea from 'primevue/textarea';
 import SplitButton from 'primevue/splitbutton';
+import Steps from 'primevue/steps';
 import 'primeicons/primeicons.css'
 
 import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
 
 
 createApp(App)
@@ -55,4 +56,5 @@ createApp(App)
     .component('Textarea', Textarea)
     .component('Toast', Toast)
     .component('SplitButton', SplitButton)
+    .component('Steps', Steps)
     .mount('#app')

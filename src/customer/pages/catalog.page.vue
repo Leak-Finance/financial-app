@@ -2,6 +2,12 @@
 import {VehicleRetailService} from "@/shared/services/vehicle-retail.service";
 import PostCatalogCard from "@/customer/components/post-catalog-card.component.vue";
 
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import ColumnGroup from 'primevue/columngroup';   // optional
+import Row from 'primevue/row';                   // optional
+
+
 export default {
   name: 'CatalogCustomersPage',
   components: { PostCatalogCard},
@@ -25,7 +31,7 @@ export default {
       currencies: [],
       tasas: [{id: 1, name: "Nominal"}, {id: 2, name: "Efectiva"}],
       plazosDeCredito: [{id: 1, cantidad: 24}, {id: 2, cantidad: 36}],
-      tiposPeriodosDeGracia: [{id: 1, nombre: "Total"}, {id: 2, nombre: "Parcial"}],
+      tiposPeriodosDeGracia: [{id: 1, nombre: "Sin periodo"},{id: 2, nombre: "Total"}, {id: 3, nombre: "Parcial"}],
 
       // Inputs for result
       moneda: null,
@@ -35,7 +41,13 @@ export default {
       plazoCredito: null,
       tipoPeriodoGracia: null,
       periodoGracia: null,
-
+      valorVehiculo: null,
+      cronograma: [],
+      tir: null,
+      tcea: null,
+      van: null,
+      calculateComplete: false,
+      cronogramaPagosIsVisible: false,
       // Outputs
       detallesCuotasDialog: false,
     };
@@ -46,7 +58,6 @@ export default {
     });
     this.vehicleRetailService.getAllCurrencies().then((response) => {
       this.currencies = response.data;
-      console.log(this.currencies)
     });
   },
   methods:{
@@ -62,15 +73,304 @@ export default {
     },
     selectCar(post) {
       this.selectedPost = post;
+      this.valorVehiculo = post.price;
       this.active = 1;
     },
     calculateRecommendedPrice(price) {
       return "Recomendado 20% (" + this.selectedPost.currency.symbol + price * 0.2 + ")";
     },
     calculateCredit(){
-      // TODO: Calculate credit
-      const result = "TODO";
+
+      // CONSTANTES
+
+      const DIAS_ANIO = 360
+      const DIAS_MES = 30
+      const CUOTAS_POR_ANIO = 12
+
+      // INPUT
+
+      const valorVehiculo = this.valorVehiculo
+      const tipoPlanPago = this.plazoCredito.id - 1
+      let tipoPeriodoGracia = 'S';
+      switch (this.tipoPeriodoGracia.id) {
+        case 2:
+          tipoPeriodoGracia = 'T'
+          break
+        case 3:
+          tipoPeriodoGracia = 'P'
+          break
+      }
+      const anios = (tipoPlanPago == 0) ? 2 : 3
+
+      const nPeriodoGracia = this.periodoGracia;
+
+      const pCuotaInicial = 0.20 // Porcentaje de cuota inicial (Recomendado: 20%)
+      const pCuotaFinal = (tipoPlanPago == 1) ? 0.40 : 0.50 // 24 meses : 50% , 36 meses = 40%
+      const cuotaInicial = this.cuotaInicial
+
+      const pTasa = this.tasaInteres / 100 // Porcentaje de Tasa de Interes
+      const tipoTasa = this.tipoTasaInteres.id - 1 // 0: TNA, 1 : TEA
+
+      const tipoPeriodo = 0 // 0: diaria, 1: mensual
+
+      const pSeguroDesgravamen = 0.00049
+      const pSeguroVehicularAnual = 0.00029
+      //const pSeguroVehicularAnual = 0.0472
+
+      const tasaCostoOportunidad = 0.50
+
+      // Convertidores de Tasa
+
+      function convertirTNAaTEA(tasa, tipoPeriodo) {
+
+        if(tipoPeriodo == 0)
+          return Math.pow(1 + tasa/(DIAS_ANIO/1),DIAS_ANIO/1) - 1
+
+        return Math.pow(1 + tasa/(DIAS_ANIO/30),DIAS_ANIO/30) - 1
+      }
+
+      function calcularTEM(tea) {
+        return ((1 + tea) ** (DIAS_MES/DIAS_ANIO)) - 1
+      }
+
+// CALCULOS
+
+      const nTotalCuotas = anios * CUOTAS_POR_ANIO
+      const cuotaFinal = valorVehiculo * pCuotaFinal
+      const montoPrestamo = valorVehiculo - cuotaInicial
+      const TEA = (tipoPeriodo == 0) ? convertirTNAaTEA(pTasa,tipoPeriodo) : pTasa
+      const TEM = calcularTEM(TEA)
+
+// Cronograma
+
+      const saldoInicialCuotaRegular = montoPrestamo - cuotaFinal/(1 + TEM) ** (nTotalCuotas + 1)
+      const saldoInicialCuotaFinal = (cuotaFinal/(1 + TEM)**(nTotalCuotas + 1))
+
+// Tasas de seguros
+
+      const tasaPeriodoSeguroDesgravamen = pSeguroDesgravamen * 12/365 * DIAS_MES
+      const seguroVehicularMensual = pSeguroVehicularAnual * 12/365 * DIAS_MES * valorVehiculo
+
+// Periodo Gracia
+
+      let nCroPeriodoGracia = nPeriodoGracia
+
+// Cuota Final
+
+      let croSaldoInicialCuotaFinal = saldoInicialCuotaFinal
+      let crosaldoFinalCuotaFinal = 0
+      let croInteresCuotaFinal = 0
+      let croAmortizacionCuotaFinal = 0
+      let croSeguroDesgravamenCuotaFinal = 0
+
+// Cuota Regular
+
+      let croSaldoInicialCuotaRegular = saldoInicialCuotaRegular
+      let croInteresCuotaRegular = 0
+      let croSeguroDesgravamenCuotaRegular = 0
+      let croAmortizacionCuotaRegular = 0;
+      let croCuotaRegular = 0
+      let croSaldoFinalCuotaRegular = 0
+
+// Flujo
+
+      let croFlujo = 0
+
+
+// Calculo de cuota
+
+
+      class PagoPeriodo {
+        constructor(idx, pg, sicf, icf, acf, segDesCf, sfcf, si, i, cuota, a, segDes, segVe, sf, flujo) {
+          this.idx = idx,
+              this.pg = pg,
+              this.sicf = sicf,
+              this.icf = icf,
+              this.acf = acf,
+              this.segDesCf = segDesCf,
+              this.sfcf = sfcf,
+              this.si = si,
+              this.i = i,
+              this.cuota = cuota,
+              this.a = a,
+              this.segDes = segDes,
+              this.segVe = segVe,
+              this.sf = sf,
+              this.flujo = flujo
+        }
+        imprimir() {
+          console.log(this.pg, this.sicf, this.icf, this.acf, this.segDesCf, this.sfcf, this.si, this.i, this.cuota, this.a, this.segDes, this.segVe, this.sf, this.flujo)
+        }
+      }
+
+      function calcularCuotaRegular(saldo) {
+        if(tipoPeriodoGracia == 'S')
+          return saldo * (TEM + tasaPeriodoSeguroDesgravamen)/(1 - (1 + TEM + tasaPeriodoSeguroDesgravamen) ** -nTotalCuotas) + seguroVehicularMensual
+
+        return saldo * (TEM + tasaPeriodoSeguroDesgravamen)/(1 - (1 + TEM + tasaPeriodoSeguroDesgravamen) ** ((nTotalCuotas - nPeriodoGracia) * -1)) + seguroVehicularMensual
+      }
+
+      let cronogramaPagos = []
+      let flujos = []
+
+      flujos.push(montoPrestamo * -1)
+
+// Calculo de Cuota
+
+      let check = false
+
+      for(let i = 1; i <= nTotalCuotas + 1; i++) {
+
+        // Cuota
+        if(!check) {
+          if(tipoPeriodoGracia == 'S') {
+            croCuotaRegular = calcularCuotaRegular(croSaldoInicialCuotaRegular)
+            check = true
+          }
+        }
+
+        // Cuota Final
+
+        croSeguroDesgravamenCuotaFinal = pSeguroDesgravamen * croSaldoInicialCuotaFinal
+        croInteresCuotaFinal = croSaldoInicialCuotaFinal * TEM
+
+        if(i == nTotalCuotas + 1)
+          croAmortizacionCuotaFinal = cuotaFinal
+
+        crosaldoFinalCuotaFinal = croSaldoInicialCuotaFinal + croInteresCuotaFinal - croAmortizacionCuotaFinal
+
+        // Cuota Regular
+
+        croInteresCuotaRegular = croSaldoInicialCuotaRegular * TEM
+        croSeguroDesgravamenCuotaRegular = croSaldoInicialCuotaRegular * tasaPeriodoSeguroDesgravamen
+        croAmortizacionCuotaRegular = croCuotaRegular -  croInteresCuotaRegular - (croSeguroDesgravamenCuotaRegular + seguroVehicularMensual)
+        croSaldoFinalCuotaRegular = croSaldoInicialCuotaRegular - croAmortizacionCuotaRegular
+
+        croFlujo = croCuotaRegular
+
+
+
+        if(i == nTotalCuotas + 1) {
+
+          croCuotaRegular = 0
+          croInteresCuotaRegular = 0
+          croAmortizacionCuotaRegular = 0
+          croSaldoInicialCuotaRegular = 0
+          croSeguroDesgravamenCuotaRegular = 0
+          croSaldoFinalCuotaRegular = 0
+          croFlujo = croAmortizacionCuotaFinal + seguroVehicularMensual + croSeguroDesgravamenCuotaFinal
+        }
+
+        flujos.push(croFlujo)
+        const pp = new PagoPeriodo(
+            i,
+            tipoPeriodoGracia,
+            croSaldoInicialCuotaFinal.toFixed(2),
+            croInteresCuotaFinal.toFixed(2),
+            croAmortizacionCuotaFinal.toFixed(2),
+            croSeguroDesgravamenCuotaFinal.toFixed(2),
+            crosaldoFinalCuotaFinal.toFixed(2),
+            croSaldoInicialCuotaRegular.toFixed(2),
+            croInteresCuotaRegular.toFixed(2),
+            croCuotaRegular.toFixed(2),
+            croAmortizacionCuotaRegular.toFixed(2),
+            croSeguroDesgravamenCuotaRegular.toFixed(2),
+            seguroVehicularMensual.toFixed(2),
+            croSaldoFinalCuotaRegular.toFixed(2),
+            croFlujo.toFixed(2)
+        )
+        this.cronograma.push(pp)
+        pp.imprimir()
+
+        // Actualizar Cuotas iniciales
+        croSaldoInicialCuotaFinal = crosaldoFinalCuotaFinal
+        croSaldoInicialCuotaRegular = croSaldoFinalCuotaRegular
+      }
+
+// Formula para el TIR
+      function IRR(values, guess) {
+        // Credits: algorithm inspired by Apache OpenOffice
+
+        // Calculates the resulting amount
+        var irrResult = function(values, dates, rate) {
+          var r = rate + 1;
+          var result = values[0];
+          for (var i = 1; i < values.length; i++) {
+            result += values[i] / Math.pow(r, (dates[i] - dates[0]) / 360);
+          }
+          return result;
+        }
+
+        // Calculates the first derivation
+        var irrResultDeriv = function(values, dates, rate) {
+          var r = rate + 1;
+          var result = 0;
+          for (var i = 1; i < values.length; i++) {
+            var frac = (dates[i] - dates[0]) / 360;
+            result -= frac * values[i] / Math.pow(r, frac + 1);
+          }
+          return result;
+        }
+
+        // Initialize dates and check that values contains at least one positive value and one negative value
+        var dates = [];
+        var positive = false;
+        var negative = false;
+        for (var i = 0; i < values.length; i++) {
+          dates[i] = (i === 0) ? 0 : dates[i - 1] + 360;
+          if (values[i] > 0) positive = true;
+          if (values[i] < 0) negative = true;
+        }
+
+        // Return error if values does not contain at least one positive value and one negative value
+        if (!positive || !negative) return '#NUM!';
+
+        // Initialize guess and resultRate
+        var guess = (typeof guess === 'undefined') ? 0.1 : guess;
+        var resultRate = guess;
+
+        // Set maximum epsilon for end of iteration
+        var epsMax = 1e-10;
+
+        // Set maximum number of iterations
+        var iterMax = 50;
+
+        // Implement Newton's method
+        var newRate, epsRate, resultValue;
+        var iteration = 0;
+        var contLoop = true;
+        do {
+          resultValue = irrResult(values, dates, resultRate);
+          newRate = resultRate - resultValue / irrResultDeriv(values, dates, resultRate);
+          epsRate = Math.abs(newRate - resultRate);
+          resultRate = newRate;
+          contLoop = (epsRate > epsMax) && (Math.abs(resultValue) > epsMax);
+        } while(contLoop && (++iteration < iterMax));
+
+        if(contLoop) return '#NUM!';
+
+        // Return internal rate of return
+        return resultRate;
+      }
+
+      const NPV = (cashflow, discountRate) => cashflow
+          .reduce((acc, val, i) => acc + val / Math.pow((1 + discountRate), i), 0);
+
+      const tasaDescuento = (1 + tasaCostoOportunidad) ** (DIAS_MES/DIAS_ANIO) - 1
+      const TIR = IRR(flujos, 0.01)
+
+      let seguroDesg = 0
+      let saldo = valorVehiculo - cuotaInicial;
+
+      const TCEA = (1 + TIR) ** (DIAS_ANIO/DIAS_MES) - 1
+      const VAN = NPV(flujos, tasaDescuento) * -1
+
+      this.van = VAN.toFixed(2)
+      this.tcea = (TCEA * 100).toFixed(2) + "%"
+      this.tir = (TIR * 100).toFixed(2) + "%"
+      const result = "TODO"
       this.selectedConfigurations = result;
+      this.calculateComplete = true;
     }
   }
 }
@@ -147,7 +447,7 @@ export default {
               <div class="grid md:flex md:gap-6 gap-2">
                 <div class="grid w-full">
                   <label class="text-sm">Tipo de tasa</label>
-                  <Dropdown v-model="moneda" :options="tasas"
+                  <Dropdown v-model="tipoTasaInteres" :options="tasas"
                             optionLabel="name" placeholder="Selecciona tipo de tasa" class="w-full" />
                 </div>
                 <div class="grid w-full">
@@ -191,11 +491,43 @@ export default {
           <!-- Step 3 -->
           <div v-if="selectedConfigurations"
                class="border w-full gap-6 p-6">
-            TODO: RESULTS
+
+            <div v-if="calculateComplete" class="grid md:grid-cols-3 gap-4">
+              <div class="grid gap-2">
+                <p class="font-medium text-secondary">Tasa Interna de Retorno (TIR)</p>
+                <p class="text-2xl font-medium text-primary">{{ tir }}</p>
+              </div>
+              <div class="grid gap-2">
+                <p class="font-medium text-secondary">Tasa de Costo Efectiva Anual (TCEA)</p>
+                <p class="text-2xl font-medium text-primary">{{ tcea }}</p>
+              </div>
+              <div class="grid gap-2">
+                <p class="font-medium text-secondary">Valor Actual Neto (VAN)</p>
+                <p class="text-2xl font-medium text-primary">{{ van }}</p>
+              </div>
+            </div>
+
+            <DataTable v-if="cronogramaPagosIsVisible" :value="cronograma" tableStyle="min-width: 50rem">
+              <Column field="idx" header="#" />
+              <Column field="pg" header="Periodo Gracia" />
+              <Column field="sicf" header="Saldo Inicial Cuota Final" />
+              <Column field="icf" header="Interes Cuota Final" />
+              <Column field="acf" header="Amortizacion Cuota Final" />
+              <Column field="segDesCf" header="Seguro Desgravamen Cuota Final" />
+              <Column field="sfcf" header="Saldo Final Cuota Final" />
+              <Column field="si" header="Saldo Inicial" />
+              <Column field="i" header="Interes" />
+              <Column field="cuota" header="Cuota" />
+              <Column field="a" header="Amortizacion" />
+              <Column field="segDes" header="Seguro Desgravamen" />
+              <Column field="segVe" header="Seguro Vehicular" />
+              <Column field="sf" header="Saldo Final" />
+              <Column field="flujo" header="Flujo" />
+            </DataTable>
 
             <div class="flex gap-4">
-              <Button label="Detalles" class="w-full" @click="detallesCuotas = true"/>
-              <Button label="Solicitar" class="w-full" severity="success" @click="detallesCuotas = true"/>
+              <Button label="Detalles" class="w-full" @click="cronogramaPagosIsVisible = !cronogramaPagosIsVisible"/>
+              <Button label="Solicitar" class="w-full" severity="success" @click="detallesCuotasDialog = true"/>
             </div>
           </div>
         </div>

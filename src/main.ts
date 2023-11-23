@@ -37,7 +37,7 @@ import Toast from 'primevue/toast';
 
 createApp(App)
     .use(createPinia())
-    .use(PrimeVue, { ripple: true, Tailwind })
+    .use(PrimeVue, { ripple: true})
     .use(router)
     .use(ToastService)
     .component('InlineMessage', InlineMessage)

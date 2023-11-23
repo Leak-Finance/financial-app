@@ -29,6 +29,7 @@ export default {
     if (user) {
       this.setUser(JSON.parse(user));
     }
+    localStorage.setItem("userEmail", this.user.email)
   },
   computed: {
     user() {

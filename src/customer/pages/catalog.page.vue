@@ -5,7 +5,8 @@ import PostCatalogCard from "@/customer/components/post-catalog-card.component.v
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import ColumnGroup from 'primevue/columngroup';   // optional
-import Row from 'primevue/row';                   // optional
+import Row from 'primevue/row';
+import {QueryService} from "@/customer/services/query.service";                   // optional
 
 
 export default {
@@ -14,6 +15,7 @@ export default {
   data() {
     return {
       vehicleRetailService: new VehicleRetailService(),
+      queryService: new QueryService(),
       itemsPerPage: 9,
       currentPage: 1,
       posts: [],
@@ -47,9 +49,10 @@ export default {
       tcea: null,
       van: null,
       calculateComplete: false,
-      cronogramaPagosIsVisible: false,
+      cronogramaPagosIsVisible: true,
       // Outputs
       detallesCuotasDialog: false,
+      pagoInicial: null,
     };
   },
   created() {
@@ -78,6 +81,27 @@ export default {
     },
     calculateRecommendedPrice(price) {
       return "Recomendado 20% (" + this.selectedPost.currency.symbol + price * 0.2 + ")";
+    },
+    solicite() {
+      const email = localStorage.getItem("userEmail");
+      const query = {
+        selectedPost: this.selectedPost,
+        moneda: this.moneda,
+        cuotaInicial: this.cuotaInicial,
+        tipoTasaInteres: this.tipoTasaInteres,
+        tasaInteres: this.tasaInteres,
+        plazoCredito: this.plazoCredito,
+        tipoPeriodoGracia: this.tipoPeriodoGracia,
+        periodoGracia: this.periodoGracia,
+        valorVehiculo: this.valorVehiculo,
+      }
+      this.$toast.add({
+        severity: "success",
+        summary: "Solicitud enviada",
+        detail: "Su solicitud ha sido enviada con éxito",
+        life: 3000,
+      });
+      this.queryService.createQuerie(email, query);
     },
     calculateCredit(){
 
@@ -223,7 +247,7 @@ export default {
 
         // Cuota
         if(!check) {
-          if(tipoPeriodoGracia == 'S') {
+          if(tipoPeriodoGracia === 'S') {
             croCuotaRegular = calcularCuotaRegular(croSaldoInicialCuotaRegular)
             check = true
           }
@@ -234,7 +258,7 @@ export default {
         croSeguroDesgravamenCuotaFinal = pSeguroDesgravamen * croSaldoInicialCuotaFinal
         croInteresCuotaFinal = croSaldoInicialCuotaFinal * TEM
 
-        if(i == nTotalCuotas + 1)
+        if(i === nTotalCuotas + 1)
           croAmortizacionCuotaFinal = cuotaFinal
 
         crosaldoFinalCuotaFinal = croSaldoInicialCuotaFinal + croInteresCuotaFinal - croAmortizacionCuotaFinal
@@ -246,11 +270,12 @@ export default {
         croAmortizacionCuotaRegular = croCuotaRegular -  croInteresCuotaRegular - (croSeguroDesgravamenCuotaRegular + seguroVehicularMensual)
         croSaldoFinalCuotaRegular = croSaldoInicialCuotaRegular - croAmortizacionCuotaRegular
 
-        croFlujo = croCuotaRegular
+        // croFlujo = croCuotaRegular
+
+        croFlujo = croAmortizacionCuotaFinal + seguroVehicularMensual + croSeguroDesgravamenCuotaFinal + croCuotaRegular
 
 
-
-        if(i == nTotalCuotas + 1) {
+        if(i === nTotalCuotas + 1) {
 
           croCuotaRegular = 0
           croInteresCuotaRegular = 0
@@ -258,7 +283,7 @@ export default {
           croSaldoInicialCuotaRegular = 0
           croSeguroDesgravamenCuotaRegular = 0
           croSaldoFinalCuotaRegular = 0
-          croFlujo = croAmortizacionCuotaFinal + seguroVehicularMensual + croSeguroDesgravamenCuotaFinal
+          //croFlujo = croAmortizacionCuotaFinal + seguroVehicularMensual + croSeguroDesgravamenCuotaFinal
         }
 
         flujos.push(croFlujo)
@@ -280,7 +305,6 @@ export default {
             croFlujo.toFixed(2)
         )
         this.cronograma.push(pp)
-        pp.imprimir()
 
         // Actualizar Cuotas iniciales
         croSaldoInicialCuotaFinal = crosaldoFinalCuotaFinal
@@ -457,7 +481,7 @@ export default {
                 </div>
               </div>
             </div>
-            lilitest@gmail.com<div class="grid gap-2">
+            <div class="grid gap-2">
               <p class="font-medium text-secondary">3. Plazo de crédito</p>
               <div class="grid md:flex md:gap-6 gap-2">
                 <div class="grid">
@@ -490,44 +514,49 @@ export default {
 
           <!-- Step 3 -->
           <div v-if="selectedConfigurations"
-               class="border w-full gap-6 p-6">
-
-            <div v-if="calculateComplete" class="grid md:grid-cols-3 gap-4">
-              <div class="grid gap-2">
-                <p class="font-medium text-secondary">Tasa Interna de Retorno (TIR)</p>
-                <p class="text-2xl font-medium text-primary">{{ tir }}</p>
+               class="border w-full gap-6 p-6 flex flex-col justify-between ">
+            <div>
+              <div v-if="calculateComplete" class="grid md:grid-cols-3 gap-4">
+                <div class="grid gap-2">
+                  <p class="font-medium text-secondary">Tasa Interna de Retorno (TIR)</p>
+                  <p class="text-2xl font-medium text-primary">{{ tir }}</p>
+                </div>
+                <div class="grid gap-2">
+                  <p class="font-medium text-secondary">Tasa de Costo Efectiva Anual (TCEA)</p>
+                  <p class="text-2xl font-medium text-primary">{{ tcea }}</p>
+                </div>
+                <div class="grid gap-2">
+                  <p class="font-medium text-secondary">Valor Actual Neto (VAN)</p>
+                  <p class="text-2xl font-medium text-primary">{{ van }}</p>
+                </div>
               </div>
-              <div class="grid gap-2">
-                <p class="font-medium text-secondary">Tasa de Costo Efectiva Anual (TCEA)</p>
-                <p class="text-2xl font-medium text-primary">{{ tcea }}</p>
+              <div v-if="calculateComplete" class="grid md:grid-cols-3 gap-4 my-5">
+                <div class="grid gap-2">
+                  <p class="font-medium text-secondary">Precio de venta</p>
+                  <p class="text-2xl font-medium text-primary">{{ `${selectedPost.price} ${moneda.name}` }}</p>
+                </div>
+                <div class="grid gap-2">
+                  <p class="font-medium text-secondary">Pago inicial</p>
+                  <p class="text-2xl font-medium text-primary">{{ this.cuotaInicial }}</p>
+                </div>
+                <div class="grid gap-2">
+                  <p class="font-medium text-secondary">Financiando</p>
+                  <p class="text-2xl font-medium text-primary">{{ `${valorVehiculo - cuotaInicial}` }}</p>
+                </div>
               </div>
-              <div class="grid gap-2">
-                <p class="font-medium text-secondary">Valor Actual Neto (VAN)</p>
-                <p class="text-2xl font-medium text-primary">{{ van }}</p>
+              <div v-if="calculateComplete" class="grid md:grid-cols-3 gap-4 my-5">
+                <div class="grid gap-2">
+                  <p class="font-medium text-secondary">Cuota regular</p>
+                  <p class="text-2xl font-medium text-primary">{{ `${cronograma[0].cuota}` }}</p>
+                </div>
               </div>
             </div>
 
-            <DataTable v-if="cronogramaPagosIsVisible" :value="cronograma" tableStyle="min-width: 50rem">
-              <Column field="idx" header="#" />
-              <Column field="pg" header="Periodo Gracia" />
-              <Column field="sicf" header="Saldo Inicial Cuota Final" />
-              <Column field="icf" header="Interes Cuota Final" />
-              <Column field="acf" header="Amortizacion Cuota Final" />
-              <Column field="segDesCf" header="Seguro Desgravamen Cuota Final" />
-              <Column field="sfcf" header="Saldo Final Cuota Final" />
-              <Column field="si" header="Saldo Inicial" />
-              <Column field="i" header="Interes" />
-              <Column field="cuota" header="Cuota" />
-              <Column field="a" header="Amortizacion" />
-              <Column field="segDes" header="Seguro Desgravamen" />
-              <Column field="segVe" header="Seguro Vehicular" />
-              <Column field="sf" header="Saldo Final" />
-              <Column field="flujo" header="Flujo" />
-            </DataTable>
+
 
             <div class="flex gap-4">
-              <Button label="Detalles" class="w-full" @click="cronogramaPagosIsVisible = !cronogramaPagosIsVisible"/>
-              <Button label="Solicitar" class="w-full" severity="success" @click="detallesCuotasDialog = true"/>
+              <Button label="Detalles" class="w-full" @click="detallesCuotasDialog = true"/>
+              <Button label="Solicitar" class="w-full" severity="success" @click="solicite()"/>
             </div>
           </div>
         </div>
@@ -537,9 +566,26 @@ export default {
 
 
   <Dialog v-model:visible="detallesCuotasDialog" modal
-          :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
-          header="Detalles de cuota" >
-    TODO: Cuadro de cuotas
+          :style="{ width: '90vw' }" :breakpoints="{ '1199px': '90vw', '575px': '90vw' }"
+          header="Detalles de cuota"
+  :draggable="false">
+    <DataTable :value="cronograma" tableStyle="min-width: 50rem">
+      <Column field="idx" header="#" />
+      <Column field="pg" header="Periodo Gracia" />
+      <Column field="sicf" header="Saldo Inicial Cuota Final" />
+      <Column field="icf" header="Interes Cuota Final" />
+      <Column field="acf" header="Amortizacion Cuota Final" />
+      <Column field="segDesCf" header="Seguro Desgravamen Cuota Final" />
+      <Column field="sfcf" header="Saldo Final Cuota Final" />
+      <Column field="si" header="Saldo Inicial" />
+      <Column field="i" header="Interes" />
+      <Column field="cuota" header="Cuota" />
+      <Column field="a" header="Amortizacion" />
+      <Column field="segDes" header="Seguro Desgravamen" />
+      <Column field="segVe" header="Seguro Vehicular" />
+      <Column field="sf" header="Saldo Final" />
+      <Column field="flujo" header="Flujo" />
+    </DataTable>
 
   </Dialog>
 

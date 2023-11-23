@@ -24,10 +24,22 @@ export default {
         {label: 'Solicita tu crédito'},
       ],
       compraInteligenteInfoDialog: false,
+      isPeriodoCapitalizacionEnabled: false,
+      isPeriodoGraciaInput: true,
 
       // Forms
       currencies: [],
       tasas: [{id: 1, name: "Nominal"}, {id: 2, name: "Efectiva"}],
+      periodosDeCapitalizacion: [
+        {id: 1, name: "Diaria"},
+        {id: 2, name: "Quincenal"},
+        {id: 3, name: "Mensual"},
+        {id: 4, name: "Bimestral"},
+        {id: 5, name: "Trimestral"},
+        {id: 6, name: "Cuatrimestral"},
+        {id: 7, name: "Semestral"},
+        {id: 8, name: "Anual"},
+      ],
       plazosDeCredito: [{id: 1, cantidad: 24}, {id: 2, cantidad: 36}],
       tiposPeriodosDeGracia: [{id: 1, nombre: "Sin periodo"},{id: 2, nombre: "Total"}, {id: 3, nombre: "Parcial"}],
 
@@ -46,10 +58,22 @@ export default {
       van: null,
       calculateComplete: false,
       cronogramaPagosIsVisible: true,
+      periodoDeCapitalizacion: null,
+      tasaCostoOportunidad: null,
       // Outputs
       detallesCuotasDialog: false,
       pagoInicial: null,
     };
+  },
+  watch: {
+    tipoTasaInteres() {
+      if (this.tipoTasaInteres.name === "Nominal") {
+        this.isPeriodoCapitalizacionEnabled = true;
+      } else {
+        this.isPeriodoCapitalizacionEnabled = false;
+      }
+    },
+
   },
   created() {
     this.vehicleRetailService.getAllVehiclePosts().then((response) => {
@@ -81,6 +105,39 @@ export default {
     calculateRecommendedPrice(price) {
       return "Recomendado 20% (" + this.selectedPost.currency.symbol + price * 0.2 + ")";
     },
+    validate(){
+      if (this.moneda === null) {
+        return "Selecciona una moneda"
+      }
+      if (this.cuotaInicial <= 0) {
+        return "La cuota inicial debe ser mayor a 0"
+      }
+      if (this.cuotaInicial > this.valorVehiculo) {
+        return "La cuota inicial no puede ser mayor al valor del vehículo"
+      }
+      if (this.tipoTasaInteres === null) {
+        return "Selecciona un tipo de tasa de interés"
+      }
+      if (this.tipoTasaInteres.name === "Nominal" && this.periodoDeCapitalizacion === null) {
+        return "Selecciona un periodo de capitalización"
+      }
+      if (this.tasaInteres <= 0 || this.tasaInteres === null && this.tasaInteres >= 100) {
+        return "La tasa de interés debe ser mayor a 0, menor a 100"
+      }
+      if (this.plazoCredito === null) {
+        return "Selecciona un plazo de crédito"
+      }
+      if (this.tipoPeriodoGracia === null) {
+        return "Selecciona un tipo de periodo de gracia"
+      }
+      if (this.tipoPeriodoGracia.name !== "Sin periodo" && this.periodoGracia <= 0 && this.periodoGracia > 6) {
+        return "El periodo de gracia debe ser mayor a 0 y menor a 6"
+      }
+      if (this.tasaCostoOportunidad <= 0 || this.tasaCostoOportunidad === null && this.tasaCostoOportunidad >= 100) {
+        return "La tasa de costo de oportunidad debe ser mayor a 0 o menor a 100"
+      }
+      return true;
+    },
     solicite() {
       const email = localStorage.getItem("userEmail");
       const query = {
@@ -93,9 +150,14 @@ export default {
         tipoPeriodoGracia: this.tipoPeriodoGracia,
         periodoGracia: this.periodoGracia,
         valorVehiculo: this.valorVehiculo,
+        periodoDeCapitalizacion: this.periodoDeCapitalizacion,
+        cronograma: this.cronograma,
+        tir: this.tir,
+        tcea: this.tcea,
+        van: this.van,
       }
       this.queryService.createQuerie(email, query).then((response) => {
-        this.$toast.dd({
+        this.$toast.add({
           severity: "success",
           summary: "Solicitud enviada",
           detail: "Su solicitud ha sido enviada con éxito",
@@ -104,13 +166,22 @@ export default {
       });
     },
     calculateCredit(){
+      if (this.validate() !== true) {
+        this.$toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: this.validate(),
+          life: 3000,
+        });
+        return;
+      }
 
       // Algoritmo de Planes de Pago - Ordinarios - Compra Inteligente
 
       // Clases
 
       class PagoPeriodo {
-        constructor(idx, pg, sicf, icf, acf, segDesCf, sfcf, si, i, cuota, a, segDes, segVe, sf, flujo) {
+        constructor(idx, pg, sicf, icf, acf, segDesCf, sfcf, si, i, cuota, a, segDes, segVe, gps, portes, gasAdm, sf, flujo) {
           this.idx = idx,
               this.pg = pg,
               this.sicf = sicf,
@@ -124,6 +195,9 @@ export default {
               this.a = a,
               this.segDes = segDes,
               this.segVe = segVe,
+              this.gps = gps,
+              this.portes = portes,
+              this.gasAdm = gasAdm,
               this.sf = sf,
               this.flujo = flujo
         }
@@ -150,8 +224,12 @@ export default {
       let nPeriodoGracia = this.periodoGracia
       let tasa = this.tasaInteres / 100
       let tipoTasa = this.tipoTasaInteres.id - 1
-      let capitalizacion = "Diaria"
-      let tasaCostoOportunidad = 0.5
+      let capitalizacion = this.periodoDeCapitalizacion.name
+      let tasaCostoOportunidad = this.tasaCostoOportunidad / 100
+      let gps = 20
+      let portes = 3.5
+      let gastosAdministracion = 3.5
+      const inputTipoPeriodoGracia = tipoPeriodoGracia
 
       // Process
 
@@ -168,11 +246,11 @@ export default {
       const TEA = calcularTEA(tasa, tipoTasa, capitalizacion)
       const TEM = calcularTEM(parseFloat(TEA))
 
-      const tasaPeriodoSeguroDesgravamen = SEGURO_DESGRAVAMEN * 12/360 * DIAS_MES
-      const seguroVehicularMensual = SEGURO_VEHICULAR * 12/360 * DIAS_MES * precioVehiculo
+      const tasaPeriodoSeguroDesgravamen = SEGURO_DESGRAVAMEN * 12/365 * DIAS_MES
+      const seguroVehicularMensual = SEGURO_VEHICULAR * 12/365 * DIAS_MES * precioVehiculo
 
-      const saldoInicialCuotaFinal = (cuotaFinal/(1 + TEM + SEGURO_DESGRAVAMEN)**(nTotalCuotas + 1))
-      const saldoInicialCuotaRegular = montoPrestamo - (cuotaFinal/((1 + TEM + SEGURO_DESGRAVAMEN)**(nTotalCuotas + 1)))
+      const saldoInicialCuotaFinal = (cuotaFinal/(1 + TEM)**(nTotalCuotas + 1))
+      const saldoInicialCuotaRegular = montoPrestamo - (cuotaFinal/((1 + TEM)**(nTotalCuotas + 1)))
 
       console.log("TEA:",TEA)
       console.log("TEM:", TEM )
@@ -183,6 +261,7 @@ export default {
       console.log("Monto del Prestamo:", montoPrestamo)
       console.log("Saldo Inicial Cuota Final", saldoInicialCuotaFinal)
       console.log("Saldo Inicial Cuota Regular", saldoInicialCuotaRegular)
+
       // Cronograma - Cuota Final
 
       let croSaldoInicialCuotaFinal = saldoInicialCuotaFinal
@@ -198,96 +277,164 @@ export default {
       let croSeguroDesgravamenCuotaRegular = 0
       let croAmortizacionCuotaRegular = 0;
       let croCuotaRegular = 0
+      let croCuotaRegularVariable = 0
       let croSaldoFinalCuotaRegular = 0
 
       let flujos = []
       let croFlujo = 0
+
+      let valorActualSaldo = 0
+      let cuotaExtra = 0
+      let saldoCuotaFinal = 0
+      let anteriorCuota = 0
+
       let check = false;
+      let iteracion = false;
+      let tulipapin = false
+
       flujos.push(montoPrestamo * -1)
 
-      for(let i = 1; i <= nTotalCuotas + 1; i++) {
+      do {
+        for(let i = 1; i <= nTotalCuotas + 1; i++) {
 
-        // Cuota Final
-        croSeguroDesgravamenCuotaFinal = tasaPeriodoSeguroDesgravamen * croSaldoInicialCuotaFinal
-        croInteresCuotaFinal = croSaldoInicialCuotaFinal * TEM
+          // Cuota Final
+          croSeguroDesgravamenCuotaFinal = SEGURO_DESGRAVAMEN * croSaldoInicialCuotaFinal
+          croInteresCuotaFinal = croSaldoInicialCuotaFinal * TEM
 
-        if(i === nTotalCuotas + 1) {
-          croAmortizacionCuotaFinal = croSaldoInicialCuotaFinal + croInteresCuotaFinal + croSeguroDesgravamenCuotaFinal
+          if(i === nTotalCuotas + 1) {
+            croAmortizacionCuotaFinal = croSaldoInicialCuotaFinal + croInteresCuotaFinal
 
-        }
-
-        croSaldoFinalCuotaFinal = croSaldoInicialCuotaFinal + croInteresCuotaFinal + croSeguroDesgravamenCuotaFinal - croAmortizacionCuotaFinal
-
-        // Cuota Regular
-        croInteresCuotaRegular = croSaldoInicialCuotaRegular * TEM
-
-        if(!check) {
-          if(tipoPeriodoGracia === 'S'){
-            croCuotaRegular = croSaldoInicialCuotaRegular * (TEM + tasaPeriodoSeguroDesgravamen)/(1 - (1 + TEM + tasaPeriodoSeguroDesgravamen) ** -((nTotalCuotas - (i - 1)))) + seguroVehicularMensual
-            check = true
-          } else if(tipoPeriodoGracia === 'P'){
-            croCuotaRegular = croInteresCuotaRegular
           }
-          else{
+
+          croSaldoFinalCuotaFinal = croSaldoInicialCuotaFinal + croInteresCuotaFinal  - croAmortizacionCuotaFinal
+
+          // Cuota Regular
+          croInteresCuotaRegular = croSaldoInicialCuotaRegular * TEM
+
+          if(!check) {
+            if(tipoPeriodoGracia === 'S'){
+              croCuotaRegular = croSaldoInicialCuotaRegular * TEM/(1 - (1 + TEM ) ** -((nTotalCuotas - (i - 1))))
+              check = true
+            } else if(tipoPeriodoGracia === 'P'){
+              croCuotaRegular = croInteresCuotaRegular
+            }
+            else{
+              croCuotaRegular = 0
+            }
+          }
+
+          if(iteracion) {
+            if(tipoPeriodoGracia === 'S'){
+              croCuotaRegular = croCuotaRegularVariable
+
+            }
+            else if(tipoPeriodoGracia === 'P'){
+              croCuotaRegular = croInteresCuotaRegular
+
+            }
+            else{
+              croCuotaRegular = 0
+
+            }
+          }
+
+          croSeguroDesgravamenCuotaRegular = croSaldoInicialCuotaRegular * tasaPeriodoSeguroDesgravamen
+
+          if(tipoPeriodoGracia === 'S') {
+            croAmortizacionCuotaRegular = croCuotaRegular -  croInteresCuotaRegular - croSeguroDesgravamenCuotaRegular - seguroVehicularMensual -croSeguroDesgravamenCuotaFinal - portes - gastosAdministracion - gps
+          }
+
+          if(tipoPeriodoGracia === 'T') {
+            croSaldoFinalCuotaRegular = croSaldoInicialCuotaRegular + croInteresCuotaRegular
+          } else {
+            croSaldoFinalCuotaRegular = croSaldoInicialCuotaRegular - croAmortizacionCuotaRegular
+          }
+
+          if(i === nTotalCuotas) {
+            valorActualSaldo = croSaldoFinalCuotaRegular/(1 + TEM)**(nTotalCuotas - nPeriodoGracia)
+            cuotaExtra = valorActualSaldo * (TEM)/(1 - (1 + TEM) ** -((nTotalCuotas + 1) - nPeriodoGracia - 1))
+            anteriorCuota = croCuotaRegular
+            saldoCuotaFinal = croSaldoFinalCuotaRegular
+            tulipapin = ok(saldoCuotaFinal)
+          }
+
+
+          if(i === nTotalCuotas + 1) {
             croCuotaRegular = 0
+            croInteresCuotaRegular = 0
+            croAmortizacionCuotaRegular = 0
+            croSaldoInicialCuotaRegular = 0
+            croSeguroDesgravamenCuotaRegular = 0
+            croSaldoFinalCuotaRegular = 0
           }
+
+          croFlujo = croCuotaRegular + croAmortizacionCuotaFinal
+
+          if(tipoPeriodoGracia === 'T' || tipoPeriodoGracia === 'P' || i === nTotalCuotas + 1 ) {
+            croFlujo += croSeguroDesgravamenCuotaRegular + croSeguroDesgravamenCuotaFinal + seguroVehicularMensual + portes + gastosAdministracion + gps
+          }
+
+          flujos.push(croFlujo)
+          const pp = new PagoPeriodo(
+              i,
+              tipoPeriodoGracia,
+              croSaldoInicialCuotaFinal.toFixed(2),
+              croInteresCuotaFinal.toFixed(2),
+              croAmortizacionCuotaFinal.toFixed(2),
+              croSeguroDesgravamenCuotaFinal.toFixed(2),
+              croSaldoFinalCuotaFinal.toFixed(2),
+              croSaldoInicialCuotaRegular.toFixed(2),
+              croInteresCuotaRegular.toFixed(2),
+              croCuotaRegular.toFixed(2),
+              croAmortizacionCuotaRegular.toFixed(2),
+              croSeguroDesgravamenCuotaRegular.toFixed(2),
+              seguroVehicularMensual.toFixed(2),
+              gps.toFixed(2),
+              portes.toFixed(2),
+              gastosAdministracion.toFixed(2),
+              croSaldoFinalCuotaRegular.toFixed(2),
+              croFlujo.toFixed(2)
+          )
+
+          this.cronograma.push(pp)
+
+          if(nPeriodoGracia - i === 0)
+            tipoPeriodoGracia = 'S'
+
+          // Actualizar Cuotas iniciales
+          croSaldoInicialCuotaFinal = croSaldoFinalCuotaFinal
+          croSaldoInicialCuotaRegular = croSaldoFinalCuotaRegular
         }
 
-        croSeguroDesgravamenCuotaRegular = croSaldoInicialCuotaRegular * tasaPeriodoSeguroDesgravamen
+        console.log("-")
 
-        if(tipoPeriodoGracia === 'S') {
-          croAmortizacionCuotaRegular = croCuotaRegular -  croInteresCuotaRegular - croSeguroDesgravamenCuotaRegular - seguroVehicularMensual
+        croSaldoInicialCuotaFinal = saldoInicialCuotaFinal
+        croSaldoFinalCuotaFinal = 0
+        croInteresCuotaFinal = 0
+        croAmortizacionCuotaFinal = 0
+        croSeguroDesgravamenCuotaFinal = 0
+        tipoPeriodoGracia = inputTipoPeriodoGracia
+        croSaldoInicialCuotaRegular = saldoInicialCuotaRegular
+        croInteresCuotaRegular = 0
+        croSeguroDesgravamenCuotaRegular = 0
+        croAmortizacionCuotaRegular = 0;
+        croSaldoFinalCuotaRegular = 0
+
+        iteracion = true
+        if(tulipapin) {
+          this.cronograma = []
+          flujos = []
         }
 
-        if(tipoPeriodoGracia === 'T') {
-          croSaldoFinalCuotaRegular = croSaldoInicialCuotaRegular + croInteresCuotaRegular
-        } else {
-          croSaldoFinalCuotaRegular = croSaldoInicialCuotaRegular - croAmortizacionCuotaRegular
-        }
+        croCuotaRegularVariable = anteriorCuota + cuotaExtra
 
-        if(i === nTotalCuotas + 1) {
-          croCuotaRegular = 0
-          croInteresCuotaRegular = 0
-          croAmortizacionCuotaRegular = 0
-          croSaldoInicialCuotaRegular = 0
-          croSeguroDesgravamenCuotaRegular = 0
-          croSaldoFinalCuotaRegular = 0
-        }
+      } while(tulipapin)
 
-        croFlujo = croCuotaRegular + croAmortizacionCuotaFinal
+      function ok(valorActualSaldo) {
+        if (valorActualSaldo <= 0.004 && valorActualSaldo >= 0)
+          return false
 
-        if(tipoPeriodoGracia === 'T' || tipoPeriodoGracia === 'P' || i === nTotalCuotas + 1 ) {
-          croFlujo += croSeguroDesgravamenCuotaRegular + croSeguroDesgravamenCuotaFinal + seguroVehicularMensual
-        }
-
-        flujos.push(croFlujo)
-        const pp = new PagoPeriodo(
-            i,
-            tipoPeriodoGracia,
-            croSaldoInicialCuotaFinal.toFixed(2),
-            croInteresCuotaFinal.toFixed(2),
-            croAmortizacionCuotaFinal.toFixed(2),
-            croSeguroDesgravamenCuotaFinal.toFixed(2),
-            croSaldoFinalCuotaFinal.toFixed(2),
-            croSaldoInicialCuotaRegular.toFixed(2),
-            croInteresCuotaRegular.toFixed(2),
-            croCuotaRegular.toFixed(2),
-            croAmortizacionCuotaRegular.toFixed(2),
-            croSeguroDesgravamenCuotaRegular.toFixed(2),
-            seguroVehicularMensual.toFixed(2),
-            croSaldoFinalCuotaRegular.toFixed(2),
-            croFlujo.toFixed(2)
-        )
-        this.cronograma.push(pp)
-        pp.imprimir()
-
-
-        if(nPeriodoGracia - i === 0)
-          tipoPeriodoGracia = 'S'
-
-        // Actualizar Cuotas iniciales
-        croSaldoInicialCuotaFinal = croSaldoFinalCuotaFinal
-        croSaldoInicialCuotaRegular = croSaldoFinalCuotaRegular
+        return true
       }
 
       // Obtener el número de años de plazo de pago
@@ -328,13 +475,24 @@ export default {
 
       // Obtener TEA a partir de TNA
       function convertirTNAaTEA(tasa, capitalizacion) {
+        console.log(tasa, capitalizacion)
 
         if(capitalizacion === "Diaria")
           return Math.pow(1 + tasa/(DIAS_ANIO),DIAS_ANIO) - 1
         else if(capitalizacion === "Quincenal")
           return Math.pow(1 + tasa/(DIAS_ANIO/15),DIAS_ANIO/15) - 1
-        else
+        else if(capitalizacion === "Mensual")
           return Math.pow(1 + tasa/(DIAS_ANIO/30),DIAS_ANIO/30) - 1
+        else if(capitalizacion === "Bimestral")
+          return Math.pow(1 + tasa/(DIAS_ANIO/60),DIAS_ANIO/60) - 1
+        else if(capitalizacion === "Trimestral")
+          return Math.pow(1 + tasa/(DIAS_ANIO/90),DIAS_ANIO/90) - 1
+        else if(capitalizacion === "Cuatrimestral")
+          return Math.pow(1 + tasa/(DIAS_ANIO/120),DIAS_ANIO/120) - 1
+        else if(capitalizacion === "Semestral")
+          return Math.pow(1 + tasa/(DIAS_ANIO/180),DIAS_ANIO/180) - 1
+        else
+          return Math.pow(1 + tasa/(DIAS_ANIO/360),DIAS_ANIO/360) - 1
       }
       // Calcular la Tasa Efectiva Anual (TEA)
       function calcularTEA(tasa, tipoTasa, capitalizacion) {
@@ -419,6 +577,9 @@ export default {
 
       const NPV = (cashflow, discountRate) => cashflow
           .reduce((acc, val, i) => acc + val / Math.pow((1 + discountRate), i), 0);
+      console.log(flujos)
+
+      flujos.unshift(montoPrestamo * -1)
 
       const tasaDescuento = (1 + tasaCostoOportunidad) ** (DIAS_MES/DIAS_ANIO) - 1
       const TIR = IRR(flujos, 0.01)
@@ -429,7 +590,11 @@ export default {
       this.van = VAN.toFixed(2)
       this.tcea = (TCEA * 100).toFixed(2) + "%"
       this.tir = (TIR * 100).toFixed(2) + "%"
+
+
       const result = "TODO"
+
+
       this.selectedConfigurations = result;
       this.calculateComplete = true;
     }
@@ -512,6 +677,12 @@ export default {
                             optionLabel="name" placeholder="Selecciona tipo de tasa" class="w-full" />
                 </div>
                 <div class="grid w-full">
+                  <label class="text-sm">Periodo de capitalización</label>
+                  <Dropdown v-model="periodoDeCapitalizacion" :disabled="!isPeriodoCapitalizacionEnabled" :options="periodosDeCapitalizacion"
+                            optionLabel="name" placeholder="Capitalización" class="w-full" />
+                </div>
+
+                <div class="grid w-full">
                   <label class="text-sm">Tasa de interés (%)</label>
                   <InputText v-model="tasaInteres"
                              aria-describedby="username-help" />
@@ -540,8 +711,18 @@ export default {
                 </div>
                 <div class="grid w-full">
                   <label class="text-sm">Periodos de gracia (meses)</label>
-                  <InputText v-model="periodoGracia"
+                  <InputText v-model="periodoGracia" :disabled="!isPeriodoGraciaInput"
                              aria-describedby="username-help" />
+                </div>
+              </div>
+            </div>
+            <div class="grid gap-2">
+              <p class="font-medium text-secondary">5. Tasa de costo de oportunidad</p>
+              <div class="grid md:flex md:gap-6 gap-2">
+                <div class="grid w-full">
+                  <label class="text-sm">Tasa de costo de oportunidad</label>
+                  <InputText v-model="tasaCostoOportunidad"
+                             placeholder="Entre 20-50" />
                 </div>
               </div>
             </div>
@@ -606,6 +787,9 @@ export default {
           :style="{ width: '90vw' }" :breakpoints="{ '1199px': '90vw', '575px': '90vw' }"
           header="Detalles de cuota"
   :draggable="false">
+
+
+
     <DataTable :value="cronograma" tableStyle="min-width: 50rem">
       <Column field="idx" header="#" />
       <Column field="pg" header="Periodo Gracia" />
@@ -655,6 +839,21 @@ export default {
         </template>
       </Column>
       <Column field="segDes" header="Seguro Desgravamen" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="gps" header="GPS" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="portes" header="Portes" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="gasAdm" header="Gastos de Administracion" >
         <template #body="slotProps">
           {{ addCurrencySign(slotProps.data[slotProps.field]) }}
         </template>

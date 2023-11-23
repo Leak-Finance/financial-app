@@ -66,6 +66,9 @@ export default {
           <!-- Client navbar -->
           <div v-if="user && isAuthenticated">
             <div class="flex gap-8 font-medium text-lg items-center">
+              <router-link to="/history">
+                <Button icon="pi pi-history" severity="info" rounded aria-label="History" />
+              </router-link>
               <fwb-dropdown :text=greeting()>
                 <fwb-list-group>
                   <fwb-list-group-item>

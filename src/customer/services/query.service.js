@@ -12,4 +12,7 @@ export class QueryService {
             parameters: parameters,
         });
     }
+    getAllQueries() {
+        return http.get('api/v1/buy-queries');
+    }
 }

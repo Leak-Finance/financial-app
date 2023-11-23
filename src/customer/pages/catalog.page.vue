@@ -38,7 +38,7 @@ export default {
       tasaInteres: null,
       plazoCredito: null,
       tipoPeriodoGracia: null,
-      periodoGracia: null,
+      periodoGracia: 0,
       valorVehiculo: null,
       cronograma: [],
       tir: null,
@@ -581,7 +581,7 @@ export default {
               <div v-if="calculateComplete" class="grid md:grid-cols-3 gap-4 my-5">
                 <div class="grid gap-2">
                   <p class="font-medium text-secondary">Cuota regular ({{ moneda.symbol}})</p>
-                  <p class="text-2xl font-medium text-primary">{{ `${cronograma[0].cuota}` }}</p>
+                  <p class="text-2xl font-medium text-primary">{{ `${cronograma[this.periodoGracia + 1].cuota}` }}</p>
                 </div>
               </div>
             </div>

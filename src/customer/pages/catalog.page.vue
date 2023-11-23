@@ -60,6 +60,9 @@ export default {
     });
   },
   methods:{
+    addCurrencySign(value) {
+      return `${this.moneda.symbol} ${value}`;
+    },
     calculateCurrentPageItems() {
       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
       const endIndex = startIndex + this.itemsPerPage;
@@ -92,7 +95,7 @@ export default {
         valorVehiculo: this.valorVehiculo,
       }
       this.queryService.createQuerie(email, query).then((response) => {
-        this.$toast.add({
+        this.$toast.dd({
           severity: "success",
           summary: "Solicitud enviada",
           detail: "Su solicitud ha sido enviada con éxito",
@@ -491,7 +494,7 @@ export default {
                 <div class="grid w-full">
                   <label class="text-sm">Moneda</label>
                   <Dropdown v-model="moneda"
-                            :options="currencies" optionLabel="symbol" placeholder="Selecciona moneda" class="w-full" />
+                            :options="currencies" optionLabel="name" placeholder="Selecciona moneda" class="w-full" />
                 </div>
                 <div class="grid w-full">
                   <label class="text-sm">Cuota Inicial</label>
@@ -509,7 +512,7 @@ export default {
                             optionLabel="name" placeholder="Selecciona tipo de tasa" class="w-full" />
                 </div>
                 <div class="grid w-full">
-                  <label class="text-sm">Tasa de interés</label>
+                  <label class="text-sm">Tasa de interés (%)</label>
                   <InputText v-model="tasaInteres"
                              aria-describedby="username-help" />
                 </div>
@@ -606,19 +609,71 @@ export default {
     <DataTable :value="cronograma" tableStyle="min-width: 50rem">
       <Column field="idx" header="#" />
       <Column field="pg" header="Periodo Gracia" />
-      <Column field="sicf" header="Saldo Inicial Cuota Final" />
-      <Column field="icf" header="Interes Cuota Final" />
-      <Column field="acf" header="Amortizacion Cuota Final" />
-      <Column field="segDesCf" header="Seguro Desgravamen Cuota Final" />
-      <Column field="sfcf" header="Saldo Final Cuota Final" />
-      <Column field="si" header="Saldo Inicial" />
-      <Column field="i" header="Interes" />
-      <Column field="cuota" header="Cuota" />
-      <Column field="a" header="Amortizacion" />
-      <Column field="segDes" header="Seguro Desgravamen" />
-      <Column field="segVe" header="Seguro Vehicular" />
-      <Column field="sf" header="Saldo Final" />
-      <Column field="flujo" header="Flujo" />
+      <Column field="sicf" header="Saldo Inicial Cuota Final" >
+        <template #body="slotProps">
+        {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+      </template>
+      </Column>
+      <Column field="icf" header="Interes Cuota Final" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="acf" header="Amortizacion Cuota Final" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="segDesCf" header="Seguro Desgravamen Cuota Final" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="sfcf" header="Saldo Final Cuota Final" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="si" header="Saldo Inicial" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="i" header="Interes" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="cuota" header="Cuota" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="a" header="Amortizacion" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="segDes" header="Seguro Desgravamen" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="segVe" header="Seguro Vehicular" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="sf" header="Saldo Final" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
+      <Column field="flujo" header="Flujo" >
+        <template #body="slotProps">
+          {{ addCurrencySign(slotProps.data[slotProps.field]) }}
+        </template>
+      </Column>
     </DataTable>
 
   </Dialog>

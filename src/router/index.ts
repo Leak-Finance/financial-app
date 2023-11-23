@@ -7,6 +7,7 @@ import EmployeeDashboardPage from "../employee/pages/dashboard.page.vue";
 import CatalogPage from "../customer/pages/catalog.page.vue";
 
 import {useUserStore} from "../authentication/services/user-store.store.js";
+import HistoryPage from "@/customer/pages/history.page.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -17,14 +18,15 @@ const router = createRouter({
     { path: '/:notFound(.*)', component: PageNotFound, meta: { requiresAuth: false }},
     { path: '/dashboard', component: EmployeeDashboardPage, meta: { requiresAuth: true }},
     { path: '/catalog', component: CatalogPage, meta: { requiresAuth: true }},
+    { path: '/history', component: HistoryPage, meta: { requiresAuth: true }}
   ]
 })
 
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
   const authRoutes = ['/login', '/register', '/login/employee'];
-  const customerRoutes = ['/catalog'];
-  const employeeRoutes = ['/dashboard'];
+  const customerRoutes = ['/catalog', '/history'];
+  const employeeRoutes = ['/dashboard','/history'];
 
   // console.log(to.path, userStore.isAuthenticated, userStore.isCustomer, userStore.isEmployee)
 

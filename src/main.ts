@@ -8,7 +8,6 @@ import App from './App.vue';
 import router from './router'
 
 import PrimeVue from "primevue/config";
-import Tailwind from "primevue/passthrough/tailwind";
 
 import 'primevue/resources/themes/soho-light/theme.css'
 
@@ -37,7 +36,7 @@ import Toast from 'primevue/toast';
 
 createApp(App)
     .use(createPinia())
-    .use(PrimeVue, { ripple: true})
+    .use(PrimeVue, { ripple: true })
     .use(router)
     .use(ToastService)
     .component('InlineMessage', InlineMessage)

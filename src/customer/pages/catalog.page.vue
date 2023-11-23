@@ -2,10 +2,6 @@
 import {VehicleRetailService} from "@/shared/services/vehicle-retail.service";
 import PostCatalogCard from "@/customer/components/post-catalog-card.component.vue";
 
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import ColumnGroup from 'primevue/columngroup';   // optional
-import Row from 'primevue/row';
 import {QueryService} from "@/customer/services/query.service";                   // optional
 
 
@@ -95,13 +91,14 @@ export default {
         periodoGracia: this.periodoGracia,
         valorVehiculo: this.valorVehiculo,
       }
-      this.$toast.add({
-        severity: "success",
-        summary: "Solicitud enviada",
-        detail: "Su solicitud ha sido enviada con éxito",
-        life: 3000,
+      this.queryService.createQuerie(email, query).then((response) => {
+        this.$toast.add({
+          severity: "success",
+          summary: "Solicitud enviada",
+          detail: "Su solicitud ha sido enviada con éxito",
+          life: 3000,
+        });
       });
-      this.queryService.createQuerie(email, query);
     },
     calculateCredit(){
 

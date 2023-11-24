@@ -23,6 +23,13 @@ export default {
   methods: {
     login() {
       event.preventDefault();
+
+      this.$toast.add({
+        severity: "info",
+        summary: "Validando credenciales...",
+        life: 1000
+      });
+
       this.authApi.signInCustomers(this.email, this.password)
           .then(res => {
             if (res.data.token) {

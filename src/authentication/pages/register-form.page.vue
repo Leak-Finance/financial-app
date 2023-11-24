@@ -47,7 +47,7 @@ export default {
   methods: {
     register(email, password, dni, firstName, lastName, phoneNumber, photoUrl) {
       this.$toast.add({
-        severity: "success",
+        severity: "info",
         summary: "Registrando datos...",
         life: 1000
       });

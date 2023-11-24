@@ -91,7 +91,7 @@ export default {
     </div>
   </Dialog>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 py-4 max-h-full">
+  <div class="grid grid-cols-1 lg:grid-cols-2 pb-4 max-h-full">
     <div class="flex justify-center items-center">
       <form @submit.prevent="register(this.email, this.password, this.dni, this.firstName, this.lastName, this.phoneNumber, this.photoUrl)"
             class="flex flex-col gap-8 justify-center px-2 lg:p-8">

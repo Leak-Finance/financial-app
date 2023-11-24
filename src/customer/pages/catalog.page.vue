@@ -619,7 +619,7 @@ export default {
 
 <template>
   <div class="container mx-auto">
-    <Steps v-model:activeStep="active" :model="items" class="-z-50" />
+    <Steps v-model:activeStep="active" :model="items" />
 
     <!-- Step 1: Select a car -->
     <div v-if="!selectedPost" class="flex flex-col items-center py-8">
@@ -627,7 +627,7 @@ export default {
         <ProgressSpinner />
         <p>Cargando posts vehiculares...</p>
       </div>
-      <div v-else-if="posts.length > 0" class="flex flex-wrap justify-center gap-12 -z-50">
+      <div v-else-if="posts.length > 0" class="flex flex-wrap justify-center gap-12 z-0">
         <PostCatalogCard
           v-for="post in calculateCurrentPageItems()"
           :post="post"

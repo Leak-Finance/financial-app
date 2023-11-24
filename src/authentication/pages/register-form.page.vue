@@ -207,9 +207,8 @@ export default {
         </div>
       </form>
     </div>
-    <!-- TODO: url( can make troubles if its not in public directory ) -->
     <div
-      :style="{ backgroundImage: 'url(\'src/assets/register-image.png\')' }"
+      :style="{ backgroundImage: 'url(\'/register-image.png\')' }"
       class="hidden lg:block w-full bg-cover bg-center bg-no-repeat h-full"
     />
   </div>

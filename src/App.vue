@@ -58,8 +58,11 @@ export default {
     <nav class="sticky container mx-auto px-4 py-4">
       <div class="flex place-content-between items-center">
         <router-link to="/">
-          <img src="./assets/finance-logo.png" alt="Finance logo"
-               class="h-6 md:h-8 hover:scale-95 duration-200" />
+          <img
+            src="./assets/finance-logo.png"
+            alt="Finance logo"
+            class="h-6 md:h-8 hover:scale-95 duration-200"
+          />
         </router-link>
 
         <div class="flex gap-6 items-center">
@@ -69,7 +72,7 @@ export default {
               <router-link to="/history">
                 <Button icon="pi pi-history" severity="info" rounded aria-label="History" />
               </router-link>
-              <fwb-dropdown :text=greeting()>
+              <fwb-dropdown :text=greeting() class="z-50">
                 <fwb-list-group>
                   <fwb-list-group-item>
                     <div class="flex flex-col items-center gap-2 w-full">

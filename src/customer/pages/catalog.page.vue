@@ -618,11 +618,11 @@ export default {
 
 <template>
   <div class="container mx-auto">
-    <Steps v-model:activeStep="active" :model="items" />
+    <Steps v-model:activeStep="active" :model="items" class="-z-50" />
 
     <!-- Step 1: Select a car -->
     <div v-if="!selectedPost" class="flex flex-col items-center gap-8 py-8">
-      <div v-if="posts.length > 0" class="flex flex-wrap justify-center gap-12">
+      <div v-if="posts.length > 0" class="flex flex-wrap justify-center gap-12 -z-50">
         <PostCatalogCard
             v-for="post in calculateCurrentPageItems()"
             :post="post"

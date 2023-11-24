@@ -55,7 +55,7 @@ export default {
 <template>
   <Toast />
   <div class="min-h-screen grid grid-rows-[auto_1fr]">
-    <nav class="sticky container mx-auto px-4 py-4">
+    <nav class="container mx-auto px-4 py-4">
       <div class="flex place-content-between items-center">
         <router-link to="/">
           <img

@@ -75,7 +75,7 @@ export default {
   },
   created() {
     this.vehicleRetailService.getAllVehiclePosts().then((response) => {
-      this.posts = response.data;
+      this.posts = response.data.reverse();
     });
     this.vehicleRetailService.getAllCurrencies().then((response) => {
       this.currencies = response.data;

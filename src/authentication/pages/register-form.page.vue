@@ -150,7 +150,7 @@ export default {
                 v-model="dni"
                 type="text"
                 aria-describedby="username-help"
-                placeholder="Ingresa DNI"
+                placeholder="Ingresa tu DNI"
                 @input="resetErrorMessage" />
           </div>
           <div class="flex flex-col gap-1 w-full">
@@ -163,7 +163,7 @@ export default {
                 v-model="phoneNumber"
                 type="text"
                 aria-describedby="username-help"
-                placeholder="Ingresa número de teléfono"
+                placeholder="Ingresa tu número de teléfono"
                 @input="resetErrorMessage" />
           </div>
         </div>
@@ -177,7 +177,7 @@ export default {
               v-model="email"
               type="text"
               aria-describedby="username-help"
-              placeholder="Ingresa correo"
+              placeholder="Ingresa tu correo"
               @input="resetErrorMessage" />
         </div>
         <div class="flex flex-col gap-1">
@@ -190,7 +190,7 @@ export default {
               type="password"
               v-model="password"
               aria-describedby="username-help"
-              placeholder="Ingresa contraseña"
+              placeholder="Ingresa tu contraseña"
               @input="resetErrorMessage" />
         </div>
         <p class="text-red-700" v-if="errorMessage">

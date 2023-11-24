@@ -1,6 +1,7 @@
 <script>
 
 export default {
+  emits: ['select'],
   name: 'PostCatalogCard',
   props: {
     post: {
@@ -48,7 +49,7 @@ export default {
 </script>
 
 <template>
-  <div class="border rounded h-[400px] w-[400px] hover:cursor-pointer hover:border-tertiary duration-200 relative">
+  <div class="border rounded h-[400px] w-[380px] md:w-[400px] hover:cursor-pointer hover:border-tertiary duration-200 relative">
     <div @click="detailsDialogVisible=true">
       <img class="w-full h-48 object-cover" :src="post.vehicle.photoUrl" :alt="post.vehicle.model">
       <div class="w-full grid px-6 pt-6 pb-2 gap-1">

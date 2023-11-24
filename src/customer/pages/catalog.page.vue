@@ -3,7 +3,6 @@ import {VehicleRetailService} from "@/shared/services/vehicle-retail.service";
 import PostCatalogCard from "@/customer/components/post-catalog-card.component.vue";
 
 import {QueryService} from "@/customer/services/query.service";
-import LoadingSpinner from "@/shared/components/loading-spinner.component.vue";                   // optional
 
 
 export default {
@@ -108,6 +107,7 @@ export default {
     calculateRecommendedPrice(price) {
       return "Recomendado 20% (" + this.selectedPost.currency.symbol + price * 0.2 + ")";
     },
+
     validate(){
       if (this.moneda === null) {
         return "Selecciona una moneda"
@@ -142,7 +142,7 @@ export default {
       if (this.tipoPeriodoGracia === null) {
         return "Selecciona un tipo de periodo de gracia"
       }
-      if (this.tipoPeriodoGracia.name !== "Sin periodo" && this.periodoGracia <= 0 && this.periodoGracia > 6) {
+      if (this.tipoPeriodoGracia.nombre !== "Sin periodo" && (this.periodoGracia <= 0 || this.periodoGracia > 6)) {
         return "El periodo de gracia debe ser mayor a 0 y menor a 6"
       }
       if (this.validateNumberInput(this.periodoGracia) !== true) {
@@ -192,6 +192,10 @@ export default {
           life: 3000,
         });
         return;
+      }
+
+      if (this.tipoPeriodoGracia.nombre === "Sin periodo") {
+        this.periodoGracia = 0;
       }
 
       // Algoritmo de Planes de Pago - Ordinarios - Compra Inteligente
@@ -677,8 +681,11 @@ export default {
             </div>
           </div>
           <!-- FORM -->
-          <form v-if="selectedConfigurations === null"
-              class="border p-6 w-full grid gap-6" @submit.prevent="calculateCredit">
+          <form
+            v-if="selectedConfigurations === null"
+            class="border p-6 w-full grid gap-6"
+            @submit.prevent="calculateCredit"
+          >
             <p class="text-2xl font-medium text-primary">Precio de venta: {{ selectedPost.currency.symbol }} {{ selectedPost.price }}</p>
             <div class="grid gap-2">
               <p class="font-medium text-secondary">1. Selecciona moneda y cuota inicial</p>
@@ -721,9 +728,16 @@ export default {
               <div class="grid md:flex md:gap-6 gap-2">
                 <div class="grid">
                   <label class="text-sm">Plazo de crédito</label>
-                  <Dropdown v-model="plazoCredito"
-                            :options="plazosDeCredito"
-                            optionLabel="cantidad" placeholder="Selecciona plazo de créditos" class="w-full" />
+                  <div class="flex justify-center items-center gap-1">
+                    <Dropdown
+                      v-model="plazoCredito"
+                      :options="plazosDeCredito"
+                      optionLabel="cantidad"
+                      placeholder="Seleccionar plazo de crédito"
+                      class="w-full"
+                    />
+                    <p>meses</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -796,8 +810,6 @@ export default {
                 </div>
               </div>
             </div>
-
-
 
             <div class="flex gap-4">
               <Button label="Detalles" class="w-full" @click="detallesCuotasDialog = true"/>

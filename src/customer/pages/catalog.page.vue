@@ -67,18 +67,10 @@ export default {
   },
   watch: {
     tipoTasaInteres() {
-      if (this.tipoTasaInteres.name === "Nominal") {
-        this.isPeriodoCapitalizacionEnabled = true;
-      } else {
-        this.isPeriodoCapitalizacionEnabled = false;
-      }
+      this.isPeriodoCapitalizacionEnabled = this.tipoTasaInteres.name === "Nominal";
     },
     tipoPeriodoGracia() {
-      if (this.tipoPeriodoGracia.nombre === "Sin periodo") {
-        this.isPeriodoGraciaInput = false;
-      } else {
-        this.isPeriodoGraciaInput = true;
-      }
+      this.isPeriodoGraciaInput = this.tipoPeriodoGracia.nombre !== "Sin periodo";
     },
   },
   created() {
@@ -456,10 +448,7 @@ export default {
       } while(tulipapin)
 
       function ok(valorActualSaldo) {
-        if (valorActualSaldo <= 0.004 && valorActualSaldo >= 0)
-          return false
-
-        return true
+        return !(valorActualSaldo <= 0.004 && valorActualSaldo >= 0);
       }
 
       // Obtener el número de años de plazo de pago

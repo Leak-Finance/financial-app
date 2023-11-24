@@ -47,15 +47,10 @@ export default {
   methods: {
     register(email, password, dni, firstName, lastName, phoneNumber, photoUrl) {
       this.authService.signUpCustomers(email, password, dni, firstName, lastName, phoneNumber, photoUrl).then((response) => {
-        if (response.data.token) {
-          localStorage.setItem('user', JSON.stringify(res.data));
-        }
-        this.setUser(response.data);
-
         this.$toast.add({
           severity: "success",
-          summary: "Éxito",
-          detail: `${response.data.message}. Redirigiendo a la cuenta...`,
+          summary: "Registro exitoso",
+          detail: `Redirigiendo a la cuenta...`,
           life: 3000
         });
         setTimeout(() => {
@@ -77,7 +72,6 @@ export default {
 </script>
 
 <template>
-  <Toast />
 
   <Dialog
     v-model:visible="visible"
@@ -97,123 +91,127 @@ export default {
     </div>
   </Dialog>
 
-  <div class="grid md:flex items-center md:text-justify overflow-hidden">
-    <form @submit.prevent="register(this.email, this.password, this.dni, this.firstName, this.lastName, this.phoneNumber, this.photoUrl)"
-          class="grid gap-8 justify-center p-8 md:w-1/2">
-      <h1 class="text-6xl font-bold text-primary">
-        Registro
-      </h1>
-      <div class="grid gap-2 md:w-[600px]">
-        <div class="flex flex-col gap-1 items-center justify-center" @click="visible = true">
-          <label for="photoUrl">
-            Escoge una avatar
-          </label>
-          <img class="h-32 w-32 rounded-full border border-secondary hover:cursor-pointer hover:scale-95 duration-200"
-               :src="photoUrl" alt="Avatar image">
-        </div>
-        <div class="flex gap-2">
-          <div class="flex flex-col gap-1 w-full">
-            <label for="name">
-              Nombre
-            </label>
-            <InputText
-                class="px-2 py-3 border rounded"
-                id="name"
-                v-model="firstName"
-                type="text"
-                aria-describedby="username-help"
-                placeholder="Ingresa tu nombre"
-                @input="resetErrorMessage" />
-          </div>
-          <div class="flex flex-col gap-1 w-full">
-            <label for="lastName">
-              Apellidos
-            </label>
-            <InputText
-                class="px-2 py-3 border rounded"
-                id="lastName"
-                v-model="lastName"
-                type="text"
-                aria-describedby="username-help"
-                placeholder="Ingresa tus apellidos"
-                @input="resetErrorMessage" />
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <div class="flex flex-col gap-1 w-full">
-            <label for="dni">
-              DNI
-            </label>
-            <InputText
-                class="px-2 py-3 border rounded"
-                id="name"
-                v-model="dni"
-                type="text"
-                aria-describedby="username-help"
-                placeholder="Ingresa tu DNI"
-                @input="resetErrorMessage" />
-          </div>
-          <div class="flex flex-col gap-1 w-full">
-            <label for="phoneNumber">
-              Número de teléfono
-            </label>
-            <InputText
-                class="px-2 py-3 border rounded"
-                id="phoneNumber"
-                v-model="phoneNumber"
-                type="text"
-                aria-describedby="username-help"
-                placeholder="Ingresa tu número de teléfono"
-                @input="resetErrorMessage" />
-          </div>
-        </div>
-        <div class="flex flex-col gap-1">
-          <label for="email">
-            Correo
-          </label>
-          <InputText
-              class="px-2 py-3 border rounded"
-              id="email"
-              v-model="email"
-              type="text"
-              aria-describedby="username-help"
-              placeholder="Ingresa tu correo"
-              @input="resetErrorMessage" />
-        </div>
-        <div class="flex flex-col gap-1">
-          <label for="password">
-            Contraseña
-          </label>
-          <InputText
-              class="px-2 py-3 border rounded"
-              id="password"
-              type="password"
-              v-model="password"
-              aria-describedby="username-help"
-              placeholder="Ingresa tu contraseña"
-              @input="resetErrorMessage" />
-        </div>
-        <p class="text-red-700" v-if="errorMessage">
-          {{ errorMessage }}
-        </p>
-      </div>
-      <div class="grid gap-4 items-center text-center">
-        <button class="btn-fill py-4 bg-secondary" type="submit">
+  <div class="grid grid-cols-1 lg:grid-cols-2 max-h-full">
+    <div class="flex justify-center items-center">
+      <form @submit.prevent="register(this.email, this.password, this.dni, this.firstName, this.lastName, this.phoneNumber, this.photoUrl)"
+            class="flex flex-col gap-8 justify-center p-8">
+        <h1 class="text-6xl font-bold text-primary">
           Registro
-        </button>
-        <p>
-          ¿Ya tienes cuenta?
-          <router-link to="/login">
+        </h1>
+        <div class="flex flex-col gap-2 md:w-[600px]">
+          <div class="flex flex-col gap-1 items-center justify-center" @click="visible = true">
+            <label for="photoUrl">
+              Escoge una avatar
+            </label>
+            <img class="h-32 w-32 rounded-full border border-secondary hover:cursor-pointer hover:scale-95 duration-200"
+                 :src="photoUrl" alt="Avatar image">
+          </div>
+          <div class="flex gap-2">
+            <div class="flex flex-col gap-1 w-full">
+              <label for="name">
+                Nombre
+              </label>
+              <InputText
+                  class="px-2 py-3 border rounded"
+                  id="name"
+                  v-model="firstName"
+                  type="text"
+                  aria-describedby="username-help"
+                  placeholder="Ingresa tu nombre"
+                  @input="resetErrorMessage" />
+            </div>
+            <div class="flex flex-col gap-1 w-full">
+              <label for="lastName">
+                Apellidos
+              </label>
+              <InputText
+                  class="px-2 py-3 border rounded"
+                  id="lastName"
+                  v-model="lastName"
+                  type="text"
+                  aria-describedby="username-help"
+                  placeholder="Ingresa tus apellidos"
+                  @input="resetErrorMessage" />
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <div class="flex flex-col gap-1 w-full">
+              <label for="dni">
+                DNI
+              </label>
+              <InputText
+                  class="px-2 py-3 border rounded"
+                  id="dni"
+                  v-model="dni"
+                  type="text"
+                  aria-describedby="username-help"
+                  placeholder="Ingresa tu DNI"
+                  @input="resetErrorMessage" />
+            </div>
+            <div class="flex flex-col gap-1 w-full">
+              <label for="phoneNumber">
+                Número de teléfono
+              </label>
+              <InputText
+                  class="px-2 py-3 border rounded"
+                  id="phoneNumber"
+                  v-model="phoneNumber"
+                  type="text"
+                  aria-describedby="username-help"
+                  placeholder="Ingresa tu número de teléfono"
+                  @input="resetErrorMessage" />
+            </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label for="email">
+              Correo
+            </label>
+            <InputText
+                class="px-2 py-3 border rounded"
+                id="email"
+                v-model="email"
+                type="text"
+                aria-describedby="username-help"
+                placeholder="Ingresa tu correo"
+                @input="resetErrorMessage" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label for="password">
+              Contraseña
+            </label>
+            <InputText
+                class="px-2 py-3 border rounded"
+                id="password"
+                type="password"
+                v-model="password"
+                aria-describedby="username-help"
+                placeholder="Ingresa tu contraseña"
+                @input="resetErrorMessage" />
+          </div>
+          <p class="text-red-700" v-if="errorMessage">
+            {{ errorMessage }}
+          </p>
+        </div>
+        <div class="grid gap-4 items-center text-center">
+          <button class="btn-fill py-4 bg-secondary" type="submit">
+            Registro
+          </button>
+          <p>
+            ¿Ya tienes cuenta?
+            <router-link to="/login">
             <span class="font-medium underline hover:text-secondary duration-200">
               Iniciar sesión
             </span>
-          </router-link>
-        </p>
-      </div>
-    </form>
-    <div class="hidden sm:block md:w-1/2 w-full">
-      <img class="w-auto rounded" src="../../assets/register-image.png" alt="Hero image">
+            </router-link>
+          </p>
+        </div>
+      </form>
     </div>
+    <!-- TODO: url( can make troubles if its not in public directory ) -->
+    <div
+      :style="{ backgroundImage: 'url(\'src/assets/register-image.png\')' }"
+      class="hidden lg:block w-full bg-cover bg-center bg-no-repeat h-full"
+    />
   </div>
 </template>
 

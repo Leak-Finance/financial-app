@@ -8,7 +8,7 @@ export class AuthService {
         return http.post('security/auth/customers/sign-up', {
             email: email,
             password: password,
-            dni: dni,
+            dni: parseInt(dni),
             firstName: firstName,
             lastName: lastName,
             phoneNumber: phoneNumber,

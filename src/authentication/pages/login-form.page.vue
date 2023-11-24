@@ -66,7 +66,7 @@ export default {
           </span>
           </router-link>
         </p>
-        <div class="grid gap-2 md:w-[600px]">
+        <div class="grid gap-2 lg:max-w-[600px]">
           <div class="flex flex-col gap-1">
             <label for="username">
               Correo

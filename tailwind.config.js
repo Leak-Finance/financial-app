@@ -1,9 +1,23 @@
+import flowbite from "flowbite/plugin";
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [],
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
+    './node_modules/flowbite-vue/**/*.{js,jsx,ts,tsx}'
+  ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: "#231651",
+        secondary: "#4DCCBD",
+        tertiary: "#9747FF"
+      }
+    },
   },
-  plugins: [],
+  plugins: [
+      flowbite
+  ],
 }
 

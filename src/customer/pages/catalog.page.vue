@@ -25,7 +25,7 @@ export default {
       ],
       compraInteligenteInfoDialog: false,
       isPeriodoCapitalizacionEnabled: false,
-      isPeriodoGraciaInput: true,
+      isPeriodoGraciaInput: false,
 
       // Forms
       currencies: [],
@@ -73,7 +73,13 @@ export default {
         this.isPeriodoCapitalizacionEnabled = false;
       }
     },
-
+    tipoPeriodoGracia() {
+      if (this.tipoPeriodoGracia.nombre === "Sin periodo") {
+        this.isPeriodoGraciaInput = false;
+      } else {
+        this.isPeriodoGraciaInput = true;
+      }
+    },
   },
   created() {
     this.vehicleRetailService.getAllVehiclePosts().then((response) => {
@@ -84,6 +90,10 @@ export default {
     });
   },
   methods:{
+    validateNumberInput(input) {
+      // Check if the input is a valid number
+      return /^[0-9.]+$/.test(input);
+    },
     addCurrencySign(value) {
       return `${this.moneda.symbol} ${value}`;
     },
@@ -115,14 +125,23 @@ export default {
       if (this.cuotaInicial > this.valorVehiculo) {
         return "La cuota inicial no puede ser mayor al valor del vehículo"
       }
+      if (this.validateNumberInput(this.cuotaInicial) !== true) {
+        return "La cuota inicial debe ser un número"
+      }
       if (this.tipoTasaInteres === null) {
         return "Selecciona un tipo de tasa de interés"
       }
       if (this.tipoTasaInteres.name === "Nominal" && this.periodoDeCapitalizacion === null) {
         return "Selecciona un periodo de capitalización"
       }
-      if (this.tasaInteres <= 0 || this.tasaInteres === null && this.tasaInteres >= 100) {
-        return "La tasa de interés debe ser mayor a 0, menor a 100"
+      if (this.tasaInteres === null){
+        return "Ingresa una tasa de interes"
+      }
+      if (this.validateNumberInput(this.tasaInteres) !== true) {
+        return "La tasa de interés debe ser un número"
+      }
+      if (this.tasaInteres <= 0 || this.tasaInteres >= 100) {
+        return "La tasa de interés debe ser mayor a 0 y menor a 100"
       }
       if (this.plazoCredito === null) {
         return "Selecciona un plazo de crédito"
@@ -133,8 +152,14 @@ export default {
       if (this.tipoPeriodoGracia.name !== "Sin periodo" && this.periodoGracia <= 0 && this.periodoGracia > 6) {
         return "El periodo de gracia debe ser mayor a 0 y menor a 6"
       }
+      if (this.validateNumberInput(this.periodoGracia) !== true) {
+        return "El periodo de gracia debe ser un número"
+      }
       if (this.tasaCostoOportunidad <= 0 || this.tasaCostoOportunidad === null && this.tasaCostoOportunidad >= 100) {
         return "La tasa de costo de oportunidad debe ser mayor a 0 o menor a 100"
+      }
+      if (this.validateNumberInput(this.tasaCostoOportunidad) !== true) {
+        return "La tasa de costo de oportunidad debe ser un número"
       }
       return true;
     },

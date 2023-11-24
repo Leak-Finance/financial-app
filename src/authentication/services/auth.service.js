@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const http = axios.create({
-    baseURL: 'http://localhost:3000/api/v1/'
+    baseURL: 'https://finance.zeabur.app/api/v1'
 });
 export class AuthService {
     signUpCustomers(email, password, dni, firstName, lastName, phoneNumber, photoUrl) {

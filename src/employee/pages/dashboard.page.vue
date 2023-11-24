@@ -89,15 +89,6 @@ export default {
         this.errorMessage = 'Todos los campos son obligatorios';
       }
       else {
-        if (this.photoUrl) {
-          const url = this.photoUrl;
-          const ext = url.substring(url.lastIndexOf('.') + 1);
-          if (ext !== 'jpg' && ext !== 'png' && ext !== 'jpeg') {
-            this.errorMessage = 'La url de la foto debe con formato jpg, jpeg o png';
-          }
-          return;
-        }
-
         this.vehicleRetailService.createVehicle(
             this.model,
             this.manufactureYear,

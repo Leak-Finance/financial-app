@@ -28,8 +28,8 @@ export default {
     const user = localStorage.getItem("user");
     if (user) {
       this.setUser(JSON.parse(user));
+      localStorage.setItem("userEmail", this.user.email)
     }
-    localStorage.setItem("userEmail", this.user.email)
   },
   computed: {
     user() {

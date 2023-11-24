@@ -79,13 +79,19 @@ export default {
 <template>
   <Toast />
 
-  <Dialog v-model:visible="visible" modal :style="{ width: '50vw' }"
-          header="Escoge un avatar" >
-    <div class="flex flex-wrap gap-8">
+  <Dialog
+    v-model:visible="visible"
+    modal
+    :draggable="false"
+    :style="{ width: 'fit' }"
+    class="w-5/6 md:w-1/2"
+    header="Selecciona un avatar"
+  >
+    <div class="flex flex-wrap justify-center gap-8">
       <div v-for="avatar in avatars" :key="avatar"
            class="flex flex-col items-center justify-center gap-2 p-2 hover:cursor-pointer hover:scale-95 duration-200">
         <div @click="changeAvatar(avatar)">
-          <img class="h-32 w-32 rounded-full border border-secondary" :src="avatar" alt="Avatar image">
+          <img class="h-16 w-16 md:h-32 md:w-32 rounded-full border border-secondary" :src="avatar" alt="Avatar image">
         </div>
       </div>
     </div>

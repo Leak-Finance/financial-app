@@ -2,19 +2,20 @@
 import {VehicleRetailService} from "@/shared/services/vehicle-retail.service";
 import PostCatalogCard from "@/customer/components/post-catalog-card.component.vue";
 
-import {QueryService} from "@/customer/services/query.service";                   // optional
+import {QueryService} from "@/customer/services/query.service";
+import LoadingSpinner from "@/shared/components/loading-spinner.component.vue";                   // optional
 
 
 export default {
   name: 'CatalogCustomersPage',
-  components: { PostCatalogCard},
+  components: {LoadingSpinner, PostCatalogCard},
   data() {
     return {
       vehicleRetailService: new VehicleRetailService(),
       queryService: new QueryService(),
       itemsPerPage: 9,
       currentPage: 1,
-      posts: [],
+      posts: null,
       active : 0,
       selectedPost: null,
       selectedConfigurations: null,
@@ -76,7 +77,7 @@ export default {
   created() {
     this.vehicleRetailService.getAllVehiclePosts().then((response) => {
       this.posts = response.data.reverse();
-    });
+    }).catch(() => this.posts = []);
     this.vehicleRetailService.getAllCurrencies().then((response) => {
       this.currencies = response.data;
     });
@@ -621,22 +622,26 @@ export default {
     <Steps v-model:activeStep="active" :model="items" class="-z-50" />
 
     <!-- Step 1: Select a car -->
-    <div v-if="!selectedPost" class="flex flex-col items-center gap-8 py-8">
-      <div v-if="posts.length > 0" class="flex flex-wrap justify-center gap-12 -z-50">
+    <div v-if="!selectedPost" class="flex flex-col items-center py-8">
+      <div v-if="posts == null" class="flex flex-col justify-center items-center gap-1">
+        <ProgressSpinner />
+        <p>Cargando posts vehiculares...</p>
+      </div>
+      <div v-else-if="posts.length > 0" class="flex flex-wrap justify-center gap-12 -z-50">
         <PostCatalogCard
-            v-for="post in calculateCurrentPageItems()"
-            :post="post"
-            :key="post.id"
-            :isSelected = false
-            @select="selectCar(post)"
+          v-for="post in calculateCurrentPageItems()"
+          :post="post"
+          :key="post.id"
+          :isSelected = false
+          @select="selectCar(post)"
         />
+        <div class="flex gap-4">
+          <Button @click="currentPage -= 1" :disabled="currentPage === 1" icon="pi pi-angle-left" outlined severity="info" />
+          <Button @click="currentPage += 1" :disabled="currentPage === Math.ceil(posts.length / itemsPerPage)" icon="pi pi-angle-right" outlined severity="info" />
+        </div>
       </div>
       <div v-else>
         <p>No hay publicaciones</p>
-      </div>
-      <div class="flex gap-4">
-        <Button @click="currentPage -= 1" :disabled="currentPage === 1" icon="pi pi-angle-left" outlined severity="info" />
-        <Button @click="currentPage += 1" :disabled="currentPage === Math.ceil(posts.length / itemsPerPage)" icon="pi pi-angle-right" outlined severity="info" />
       </div>
     </div>
 

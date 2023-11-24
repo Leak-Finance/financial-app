@@ -1,6 +1,7 @@
 <script>
 
 export default {
+  emits: ['select'],
   name: 'PostCatalogCard',
   props: {
     post: {

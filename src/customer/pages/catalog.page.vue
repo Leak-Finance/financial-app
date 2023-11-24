@@ -619,7 +619,13 @@ export default {
 
 <template>
   <div class="container mx-auto">
-    <Steps v-model:activeStep="active" :model="items" />
+    <Steps
+      v-model:activeStep="active"
+      :model="items"
+      :pt="{
+        label: { class: 'text-sm md:text-base' }
+      }"
+    />
 
     <!-- Step 1: Select a car -->
     <div v-if="!selectedPost" class="flex flex-col items-center py-8">
@@ -649,7 +655,7 @@ export default {
 
     <!-- Step 2: -->
     <div v-if="selectedPost">
-      <div class="w-full p-6 my-6 grid gap-4">
+      <div class="w-full p-2 lg:p-6 my-6 grid gap-4">
         <div class="flex gap-4 items-center">
           <Button icon="pi pi-arrow-left" text rounded aria-label="Filter" @click="restart" />
           <p class=" font-medium text-primary">Crédito vehicular con Compra Inteligente</p>

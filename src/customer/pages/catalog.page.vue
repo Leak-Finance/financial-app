@@ -627,14 +627,16 @@ export default {
         <ProgressSpinner />
         <p>Cargando posts vehiculares...</p>
       </div>
-      <div v-else-if="posts.length > 0" class="flex flex-wrap justify-center gap-12 z-0">
-        <PostCatalogCard
-          v-for="post in calculateCurrentPageItems()"
-          :post="post"
-          :key="post.id"
-          :isSelected = false
-          @select="selectCar(post)"
-        />
+      <div v-else-if="posts.length > 0" class="flex flex-col items-center gap-6">
+        <div class="flex flex-wrap justify-center gap-12">
+          <PostCatalogCard
+            v-for="post in calculateCurrentPageItems()"
+            :post="post"
+            :key="post.id"
+            :isSelected = false
+            @select="selectCar(post)"
+          />
+        </div>
         <div class="flex gap-4">
           <Button @click="currentPage -= 1" :disabled="currentPage === 1" icon="pi pi-angle-left" outlined severity="info" />
           <Button @click="currentPage += 1" :disabled="currentPage === Math.ceil(posts.length / itemsPerPage)" icon="pi pi-angle-right" outlined severity="info" />

@@ -72,7 +72,7 @@ export default {
               <router-link to="/history">
                 <Button icon="pi pi-history" severity="info" rounded aria-label="History" />
               </router-link>
-              <fwb-dropdown :text=greeting() class="z-50">
+              <fwb-dropdown :text='greeting()'>
                 <fwb-list-group>
                   <fwb-list-group-item>
                     <div class="flex flex-col items-center gap-2 w-full">

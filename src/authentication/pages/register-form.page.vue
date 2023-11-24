@@ -91,22 +91,22 @@ export default {
     </div>
   </Dialog>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 max-h-full">
+  <div class="grid grid-cols-1 lg:grid-cols-2 py-4 max-h-full">
     <div class="flex justify-center items-center">
       <form @submit.prevent="register(this.email, this.password, this.dni, this.firstName, this.lastName, this.phoneNumber, this.photoUrl)"
-            class="flex flex-col gap-8 justify-center p-8">
+            class="flex flex-col gap-8 justify-center px-2 lg:p-8">
         <h1 class="text-6xl font-bold text-primary">
           Registro
         </h1>
         <div class="flex flex-col gap-2 md:w-[600px]">
           <div class="flex flex-col gap-1 items-center justify-center" @click="visible = true">
             <label for="photoUrl">
-              Escoge una avatar
+              Selecciona un avatar
             </label>
             <img class="h-32 w-32 rounded-full border border-secondary hover:cursor-pointer hover:scale-95 duration-200"
                  :src="photoUrl" alt="Avatar image">
           </div>
-          <div class="flex gap-2">
+          <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col gap-1 w-full">
               <label for="name">
                 Nombre
@@ -115,6 +115,7 @@ export default {
                   class="px-2 py-3 border rounded"
                   id="name"
                   v-model="firstName"
+                  width="fit"
                   type="text"
                   aria-describedby="username-help"
                   placeholder="Ingresa tu nombre"
@@ -134,32 +135,34 @@ export default {
                   @input="resetErrorMessage" />
             </div>
           </div>
-          <div class="flex gap-2">
+          <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col gap-1 w-full">
               <label for="dni">
                 DNI
               </label>
               <InputText
-                  class="px-2 py-3 border rounded"
-                  id="dni"
-                  v-model="dni"
-                  type="text"
-                  aria-describedby="username-help"
-                  placeholder="Ingresa tu DNI"
-                  @input="resetErrorMessage" />
+                class="px-2 py-3 border rounded"
+                id="dni"
+                v-model="dni"
+                type="text"
+                aria-describedby="username-help"
+                placeholder="Ingresa tu DNI"
+                @input="resetErrorMessage"
+              />
             </div>
             <div class="flex flex-col gap-1 w-full">
               <label for="phoneNumber">
                 Número de teléfono
               </label>
               <InputText
-                  class="px-2 py-3 border rounded"
-                  id="phoneNumber"
-                  v-model="phoneNumber"
-                  type="text"
-                  aria-describedby="username-help"
-                  placeholder="Ingresa tu número de teléfono"
-                  @input="resetErrorMessage" />
+                class="px-2 py-3 border rounded"
+                id="phoneNumber"
+                v-model="phoneNumber"
+                type="text"
+                aria-describedby="username-help"
+                placeholder="Ingresa tu número de teléfono"
+                @input="resetErrorMessage"
+              />
             </div>
           </div>
           <div class="flex flex-col gap-1">
@@ -167,13 +170,14 @@ export default {
               Correo
             </label>
             <InputText
-                class="px-2 py-3 border rounded"
-                id="email"
-                v-model="email"
-                type="text"
-                aria-describedby="username-help"
-                placeholder="Ingresa tu correo"
-                @input="resetErrorMessage" />
+              class="px-2 py-3 border rounded"
+              id="email"
+              v-model="email"
+              type="text"
+              aria-describedby="username-help"
+              placeholder="Ingresa tu correo"
+              @input="resetErrorMessage"
+            />
           </div>
           <div class="flex flex-col gap-1">
             <label for="password">

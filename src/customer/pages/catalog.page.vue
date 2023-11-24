@@ -8,7 +8,7 @@ import LoadingSpinner from "@/shared/components/loading-spinner.component.vue"; 
 
 export default {
   name: 'CatalogCustomersPage',
-  components: {LoadingSpinner, PostCatalogCard},
+  components: {PostCatalogCard},
   data() {
     return {
       vehicleRetailService: new VehicleRetailService(),

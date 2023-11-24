@@ -32,6 +32,7 @@ import 'primeicons/primeicons.css'
 
 import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
+import {FwbDropdown, FwbListGroup, FwbListGroupItem} from "flowbite-vue";
 
 
 createApp(App)
@@ -56,4 +57,7 @@ createApp(App)
     .component('Toast', Toast)
     .component('SplitButton', SplitButton)
     .component('Steps', Steps)
+    .component('fwb-dropdown', FwbDropdown)
+    .component('fwb-list-group', FwbListGroup)
+    .component('fwb-list-group-item', FwbListGroupItem)
     .mount('#app')

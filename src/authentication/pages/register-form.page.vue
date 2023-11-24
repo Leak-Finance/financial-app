@@ -46,6 +46,12 @@ export default {
   },
   methods: {
     register(email, password, dni, firstName, lastName, phoneNumber, photoUrl) {
+      this.$toast.add({
+        severity: "success",
+        summary: "Registrando datos...",
+        life: 1000
+      });
+
       this.authService.signUpCustomers(email, password, dni, firstName, lastName, phoneNumber, photoUrl).then((response) => {
         this.$toast.add({
           severity: "success",
